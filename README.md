@@ -1,4 +1,4 @@
-# PDCP
+# PDCS
 Primal Dual Algorithm for Conic Programming
 - A Julia and CUDA implementation of the Primal-Dual algorithm for conic programming
 
@@ -19,9 +19,9 @@ where $\mathcal{K}_G$ is a closed convex cone, and $\mathcal{K}_x$ is a closed c
 
 ### Installation
 ```bash
-git clone https://github.com/zhenweilin/PDCP.git
-cd PDCP
-cd src/pdcp_gpu/cuda
+git clone https://github.com/ZikaiXiong/PDCS.git
+cd PDCS
+cd src/pdcs_gpu/cuda
 make # compile the cuda code, default ARCH = sm_90, if necessary please modify makefile
 cd ../../..
 ```
@@ -53,7 +53,7 @@ where $\lambda=c-G^{\top}y=[\lambda_{1}^{\top},\lambda_{2}^{\top}]^{\top},\lambd
 
 
 ### Citation
-- Lin Zhenwei and Zikai Xiong. (2025). zhenweilin/PDCP: v1.0 (v1.0). Zenodo. https://doi.org/10.5281/zenodo.14954645
+- Lin Zhenwei and Zikai Xiong. (2025). ZikaiXiong/PDCS: v1.0 (v1.0). Zenodo. https://doi.org/10.5281/zenodo.14954645
 
 ### Paper
 - Coming soon
