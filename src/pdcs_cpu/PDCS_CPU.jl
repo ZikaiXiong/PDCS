@@ -1,4 +1,4 @@
-module PDCP_CPU
+module PDCS_CPU
 
 using Random, SparseArrays, LinearAlgebra
 using Printf

@@ -1,6 +1,6 @@
 
 using Pkg
-Pkg.activate("pdcp_env")
+Pkg.activate("pdcs_env")
 
 Pkg.add(Pkg.PackageSpec(name="JuMP", version="1.22.2"))
 Pkg.add(Pkg.PackageSpec(name="CodecZlib", version="0.7.5"))
