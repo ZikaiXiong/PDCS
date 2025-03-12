@@ -1,4 +1,4 @@
-module PDCP_GPU
+module PDCS_GPU
 
 using Random, SparseArrays, LinearAlgebra
 using Printf

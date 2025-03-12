@@ -607,7 +607,7 @@ function MOI.optimize!(
         end
     end
     if options[:use_scaling]
-        sol_res = PDCP_GPU.rpdhg_gpu_solve(
+        sol_res = PDCS_GPU.rpdhg_gpu_solve(
             n = A.n,
             m = A.m,
             nb = A.n,
@@ -658,7 +658,7 @@ function MOI.optimize!(
             objective_constant = objective_constant,
         )
     else
-        sol_res = PDCP_GPU.rpdhg_gpu_solve(
+        sol_res = PDCS_GPU.rpdhg_gpu_solve(
             n = A.n,
             m = A.m,
             nb = A.n,
