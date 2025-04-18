@@ -1,6 +1,6 @@
-<p align="center">
-  <img src="https://raw.githubusercontent.com/ZikaiXiong/PDCS/main/pdcs_assets/PDCS_logo.png" width="70%">
-</p>
+<h1 align="center" margin=0px>
+  <img src="./pdcs_assets/PDCS_logo.png" width=70%>
+</h1>
 
 
 A Julia and CUDA implementation of the Primal-Dual algorithm for conic programming
