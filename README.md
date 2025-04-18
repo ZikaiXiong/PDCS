@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://raw.githubusercontent.com/ZikaiXiong/PDCS/main/pdcs_assets/PDCS_logo.png" width="70%">
+  <img src="./pdcs_assets/PDCS_logo.png" width="70%">
 </p>
 
 
