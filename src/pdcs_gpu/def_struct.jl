@@ -968,25 +968,73 @@ mutable struct probData{
     cNrmInf::rpdhg_float
     diagonal_scale::Diagonal_preconditioner
     raw_data::Union{rpdhgRawData,Nothing}
-    function probData(; m::Integer, n::Integer, nb::Integer,
-         c_cpu::AbstractVector{rpdhg_float}, coeff::coeffType, coeffTrans::coeffTransType,
-         GlambdaMax::rpdhg_float, GlambdaMax_flag::Integer, bl_cpu::AbstractVector{rpdhg_float}, bu_cpu::AbstractVector{rpdhg_float},
-         diagonal_scale::Diagonal_preconditioner, raw_data::Union{rpdhgRawData,Nothing}) where{
-            coeffType<:Union{coeffUnion},
-            coeffTransType<:Union{coeffUnion},
-         }
-        bl_finite = deepcopy(bl_cpu)
-        bu_finite = deepcopy(bu_cpu)
-        if length(bl_cpu) > 0
-            bl_finite = replace(bl_finite, -Inf=>0.0)
-            bu_finite = replace(bu_finite, Inf=>0.0)
-        end
-        d_c = CuArray(c_cpu)
-        d_bl = CuArray(bl_cpu)
-        d_bu = CuArray(bu_cpu)
-        (hNrm1, hNrm2, cNrm1, cNrm2, hNrmInf, cNrmInf) = cal_constant(; c = d_c, h = coeff.d_h)
-        new{CuArray, coeffType, coeffTransType}(m, n, nb, d_c, coeff, coeffTrans, GlambdaMax, GlambdaMax_flag, d_bl, d_bu, bl_finite, bu_finite, hNrm1, hNrm2, cNrm1, cNrm2, hNrmInf, cNrmInf, diagonal_scale, raw_data)
+end
+
+"""
+    probData_from_cpu_data(; m, n, nb, c_cpu, coeff, coeffTrans, GlambdaMax, GlambdaMax_flag, bl_cpu, bu_cpu, diagonal_scale, raw_data)
+Create a `probData` struct from CPU-side problem data.
+"""
+function probData_from_cpu_data(; m::Integer, n::Integer, nb::Integer,
+    c_cpu::AbstractVector{rpdhg_float},
+    coeff::coeffType,
+    coeffTrans::coeffTransType,
+    GlambdaMax::rpdhg_float,
+    GlambdaMax_flag::Integer,
+    bl_cpu::AbstractVector{rpdhg_float},
+    bu_cpu::AbstractVector{rpdhg_float},
+    diagonal_scale::Diagonal_preconditioner,
+    raw_data::Union{rpdhgRawData,Nothing}
+) where {
+    coeffType<:Union{coeffUnion},
+    coeffTransType<:Union{coeffUnion}
+}
+    bl_finite = deepcopy(bl_cpu)
+    bu_finite = deepcopy(bu_cpu)
+    if length(bl_cpu) > 0
+        bl_finite = replace(bl_finite, -Inf=>0.0)
+        bu_finite = replace(bu_finite, Inf=>0.0)
     end
+    d_c = CuArray(c_cpu)
+    d_bl = CuArray(bl_cpu)
+    d_bu = CuArray(bu_cpu)
+    (hNrm1, hNrm2, cNrm1, cNrm2, hNrmInf, cNrmInf) = cal_constant(; c = d_c, h = coeff.d_h)
+    return probData{CuArray, coeffType, coeffTransType}(
+        m, n, nb, d_c, coeff, coeffTrans, GlambdaMax, GlambdaMax_flag, d_bl, d_bu, bl_finite, bu_finite, hNrm1, hNrm2, cNrm1, cNrm2, hNrmInf, cNrmInf, diagonal_scale, raw_data
+    )
+end
+
+"""
+    probData_from_gpu_data(; m, n, nb, c_gpu, coeff, coeffTrans, GlambdaMax, GlambdaMax_flag, bl_gpu, bu_gpu, diagonal_scale, raw_data)
+Create a `probData` struct from GPU-side problem data (inputs are already on the GPU).
+"""
+function probData_from_gpu_data(; 
+    m::Integer, 
+    n::Integer, 
+    nb::Integer,
+    c_gpu::CuArray,
+    coeff::coeffType,
+    coeffTrans::coeffTransType,
+    GlambdaMax::rpdhg_float,
+    GlambdaMax_flag::Integer,
+    bl_gpu::CuArray,
+    bu_gpu::CuArray,
+    diagonal_scale::Diagonal_preconditioner,
+    raw_data::Union{rpdhgRawData,Nothing}
+) where {coeffType<:Union{coeffUnion}, coeffTransType<:Union{coeffUnion}}
+
+    bl_finite = deepcopy(Array(bl_gpu))
+    bu_finite = deepcopy(Array(bu_gpu))
+    if length(bl_finite) > 0
+        bl_finite = replace(bl_finite, -Inf=>0.0)
+        bu_finite = replace(bu_finite, Inf=>0.0)
+    end
+
+    # cal_constant expects GPU arrays
+    (hNrm1, hNrm2, cNrm1, cNrm2, hNrmInf, cNrmInf) = cal_constant(; c = c_gpu, h = coeff.d_h)
+
+    return probData{CuArray, coeffType, coeffTransType}(
+        m, n, nb, c_gpu, coeff, coeffTrans, GlambdaMax, GlambdaMax_flag, bl_gpu, bu_gpu, bl_finite, bu_finite, hNrm1, hNrm2, cNrm1, cNrm2, hNrmInf, cNrmInf, diagonal_scale, raw_data
+    )
 end
 
 mutable struct rpdhgSolver

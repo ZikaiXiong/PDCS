@@ -10,7 +10,6 @@ using Polynomials
 using Statistics
 using CUDA
 using Libdl
-using JLD2 # for debugging
 using Logging
 using Dates
 # Logging.with_logger(Logging.NullLogger()) do

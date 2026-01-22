@@ -7,6 +7,7 @@ using .PDCS_CPU
 using LinearAlgebra
 using JuMP
 using Random, SparseArrays
+using CUDA
 
 import MathOptInterface as MOI
 rng = Random.MersenneTwister(1)
@@ -44,3 +45,86 @@ for i in 0:(Int(m_exp / 3) - 1)
     @constraint(model, (A * x - b)[m_zero+m_nonnegative + i * 3 + 1:m_zero+m_nonnegative+(i+1) * 3] in MOI.ExponentialCone())
 end
 optimize!(model)
+
+
+sol_res = PDCS_GPU.rpdhg_gpu_solve(
+    n = n,
+    m = m,
+    nb = n,
+    c_cpu = c,
+    G_cpu = A,
+    h_cpu = b,
+    mGzero = m_zero,
+    mGnonnegative = m_nonnegative,
+    socG = Vector{Integer}([]),
+    rsocG = Vector{Integer}([]),
+    expG = Int(m_exp / 3),
+    dual_expG = 0,
+    bl_cpu = zeros(n),
+    bu_cpu = ones(n) * Inf,
+    soc_x = Vector{Integer}([]),
+    rsoc_x = Vector{Integer}([]),
+    exp_x = 0,
+    dual_exp_x = 0,
+    use_preconditioner = true,
+    method = :average,
+    print_freq = 1,
+    time_limit = 1000.0,
+    use_adaptive_restart = true,
+    use_adaptive_step_size_weight = true,
+    use_resolving = true,
+    use_accelerated = false,
+    use_aggressive = true,
+    verbose = 2,
+    rel_tol = 1e-6,
+    abs_tol = 1e-6,
+    kkt_restart_freq = 2000,
+    duality_gap_restart_freq = 2000,
+    use_kkt_restart = false,
+    use_duality_gap_restart = true,
+    logfile_name = nothing,
+    # max_outer_iter = 3,
+    # max_inner_iter = 10,
+)
+
+
+G_gpu = CUDA.CUSPARSE.CuSparseMatrixCSR(A)
+sol_res = PDCS_GPU.rpdhg_gpu_solve_input_gpu_data(
+    n = n,
+    m = m,
+    nb = n,
+    c_gpu = CuArray(c),
+    G_gpu = G_gpu,
+    h_gpu = CuArray(b),
+    mGzero = m_zero,
+    mGnonnegative = m_nonnegative,
+    socG = Vector{Integer}([]),
+    rsocG = Vector{Integer}([]),
+    expG = Int(m_exp / 3),
+    dual_expG = 0,
+    bl_gpu = CuArray(zeros(n)),
+    bu_gpu = CuArray(ones(n) * Inf),
+    soc_x = Vector{Integer}([]),
+    rsoc_x = Vector{Integer}([]),
+    exp_x = 0,
+    dual_exp_x = 0,
+    use_preconditioner = true,
+    method = :average,
+    print_freq = 1,
+    time_limit = 1000.0,
+    use_adaptive_restart = true,
+    use_adaptive_step_size_weight = true,
+    use_resolving = true,
+    use_accelerated = false,
+    use_aggressive = true,
+    verbose = 2,
+    rel_tol = 1e-6,
+    abs_tol = 1e-6,
+    kkt_restart_freq = 2000,
+    duality_gap_restart_freq = 2000,
+    use_kkt_restart = false,
+    use_duality_gap_restart = true,
+    logfile_name = nothing,
+    # max_outer_iter = 3,
+    # max_inner_iter = 10,
+)

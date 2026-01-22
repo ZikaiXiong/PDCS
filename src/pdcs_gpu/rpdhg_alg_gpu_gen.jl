@@ -384,6 +384,751 @@ function infoSummary(;info::PDHGCLPInfo)
 end
 
 
+function rpdhg_gpu_solve_input_gpu_data(;
+    n::Integer,
+    m::Integer,
+    nb::Integer,
+    c_gpu::CuArray{rpdhg_float},
+    G_gpu::dGType,
+    h_gpu::dhType,
+    mGzero::Integer, # m of Q for zero cone
+    mGnonnegative::Integer, # m of Q for positive cone
+    socG::Vector{<:Integer},
+    rsocG::Vector{<:Integer},
+    expG::Integer,
+    dual_expG::Integer,
+    bl_gpu::CuArray{rpdhg_float},
+    bu_gpu::CuArray{rpdhg_float},
+    soc_x::Vector{<:Integer},
+    rsoc_x::Vector{<:Integer},
+    exp_x::Integer = 0,
+    dual_exp_x::Integer = 0,
+    Dl_gpu::CuArray{rpdhg_float} = CuArray(ones(m)),
+    Dr_gpu::CuArray{rpdhg_float} = CuArray(ones(n)),
+    rescaling_method::Symbol = :ruiz_pock_chambolle,
+    use_preconditioner::Bool = true,
+    use_adaptive_restart::Bool = true,
+    use_adaptive_step_size_weight::Bool = true,
+    use_aggressive::Bool = true,
+    use_accelerated::Bool = false,
+    use_resolving::Bool = true,
+    primal_sol_gpu::CuArray{rpdhg_float} = CuArray(zeros(n)),
+    dual_sol_gpu::CuArray{rpdhg_float} = CuArray(zeros(m)),
+    warm_start::Bool = false,
+    max_outer_iter::Integer = 10000,
+    max_inner_iter::Integer = 500000,
+    abs_tol::rpdhg_float = 1e-6,
+    rel_tol::rpdhg_float = 1e-6,
+    eps_primal_infeasible_low_acc::rpdhg_float = 1e-12,
+    eps_dual_infeasible_low_acc::rpdhg_float = 1e-12,
+    eps_primal_infeasible_high_acc::rpdhg_float = 1e-16,
+    eps_dual_infeasible_high_acc::rpdhg_float = 1e-16,
+    print_freq::Integer = 2000,
+    check_terminate_freq::Integer = 2000,
+    verbose::Integer = 1,
+    time_limit::Float64 = Inf,
+    method::Symbol = :average,
+    logfile_name::Union{String, Nothing} = nothing,
+    use_kkt_restart::Bool = false,
+    kkt_restart_freq::Integer = 2000,
+    use_duality_gap_restart::Bool = true,
+    duality_gap_restart_freq::Integer = 2000
+)where {dhType<:Union{CuVector{Float64},CuArray, Nothing},
+dGType<:Union{
+    CUDA.CUSPARSE.CuSparseMatrixCSR{Float64,Int32},
+    Adjoint{Float64, CUDA.CUSPARSE.CuSparseMatrixCSR{Float64, Int32}},
+    CUDA.CUSPARSE.CuSparseMatrixCSR{Float64,Int64},
+    Adjoint{Float64, CUDA.CUSPARSE.CuSparseMatrixCSR{Float64, Int64}}
+}}
+    if logfile_name === nothing
+        if verbose > 0
+            println("logfile is set to $logfile_name")
+        end
+    else
+        # 设置日志器并使用
+        logfile = open(logfile_name, "w")
+        logger = PlainMultiLogger([stdout, logfile], Logging.Info)  # 同时输出到终端和文件
+        # 设置全局日志器
+        global_logger(logger)
+        formatted_time = Dates.format(now(), "yyyy-mm-dd HH:MM:SS")
+        @info "logfile is set to $logfile_name at $formatted_time"
+    end
+    # Check the assertion
+    global num_threads = nthreads()
+    global time_proj = 0.0
+    global time_iterative = 0.0
+    global time_restart_check = 0.0
+    global time_exit_check = 0.0
+    global time_print_info_cal = 0.0
+    global handle = create_cublas_handle()
+    if verbose > 0
+        @info ("---------------------------------------------------")
+        @info ("------------- Parameter Info Summary --------------")
+        @info ("---------------------------------------------------")
+        @info ("time limit: $time_limit")
+        @info ("use_preconditioner: $use_preconditioner")
+        @info ("use_adaptive_restart: $use_adaptive_restart")
+        @info ("use_adaptive_step_size_weight: $use_adaptive_step_size_weight")
+        @info ("use_aggressive: $use_aggressive")
+        @info ("use_duality_gap_restart: $use_duality_gap_restart")
+        @info ("duality_gap_restart_freq: $duality_gap_restart_freq")
+        @info ("use_kkt_restart: $use_kkt_restart")
+        @info ("kkt_restart_freq: $kkt_restart_freq")
+        @info ("abs_tol: $abs_tol")
+        @info ("rel_tol: $rel_tol")
+        @info ("eps_primal_infeasible_low_acc: $eps_primal_infeasible_low_acc")
+        @info ("eps_dual_infeasible_low_acc: $eps_dual_infeasible_low_acc")
+        @info ("eps_primal_infeasible_high_acc: $eps_primal_infeasible_high_acc")
+        @info ("eps_dual_infeasible_high_acc: $eps_dual_infeasible_high_acc")
+        @info ("print_freq: $print_freq")
+        @info ("check_terminate_freq: $check_terminate_freq")
+        @info ("---------------------------------------------------")
+        @info ("------------- Model Info Summary -----------------")
+        @info ("---------------------------------------------------")
+        @info ("variable number: $n")
+        @info ("constraint number: $m")
+        @info ("Number of box constraints: $nb")
+        @info ("Number of equal constraints: $mGzero")
+        @info ("Number of nonnegative constraints: $mGnonnegative")
+        @info ("Number of soc cone constraints: $(length(socG))")
+        @info ("Number of rsoc cone constraints: $(length(rsocG))")
+        @info ("Number of exp cone constraints: $expG")
+        @info ("Number of dual exp cone constraints: $dual_expG")
+        @info ("Number of soc cone variables: $(length(soc_x))")
+        @info ("Number of rsoc cone variables: $(length(rsoc_x))")
+        @info ("Number of exp cone variables: $exp_x")
+        @info ("Number of dual exp cone variables: $dual_exp_x")
+        @info ("---------------------------------------------------")
+    end
+    if m != size(G_gpu, 1)
+        error("m does not match the size of G")
+    end
+    if m != mGzero + mGnonnegative + sum(socG) + sum(rsocG) + (expG + dual_expG) * 3
+        error("m does not match the sum of mGzero, mGnonnegative, socG, rsocG, and (expG + dual_expG) * 3")
+    end
+    if method != :average && method != :halpern
+        throw(ArgumentError("method only available for :average and :halpern"))
+    end
+    if use_preconditioner
+        if verbose > 0
+            @info "Using preconditioner"
+        end
+    else
+        if verbose > 0
+            @info "Don't use preconditioner"
+        end
+    end
+
+    Random.seed!(1234)
+    if length(primal_sol_gpu) == n && length(dual_sol_gpu) == m
+        if !warm_start
+            if verbose > 0
+                @info ("Warm start not enabled. Ignoring warm start values.")
+                @info ("Initializing primal and dual variables to zero.")
+            end
+            # fill!(primal_sol_cpu, 0.0)
+            # fill!(dual_sol_cpu, 0.0)
+            primal_sol_gpu .= 0.0
+            dual_sol_gpu .= 0.0
+        else
+            if verbose > 0
+                @info ("Warm start!!")
+            end
+        end
+    else
+        if warm_start
+            throw(ArgumentError("Warmstart doesn't match the problem size"))
+        end
+        if verbose > 0
+            @info ("Initializing primal and dual variables to random.")
+        end
+        primal_sol_gpu = CuArray(rand(n))
+        dual_sol_gpu = CuArray(rand(m))
+    end
+    # make sure rescaling_method do not change initial data
+    @assert all(bl_gpu .<= bu_gpu) "Not all elements of bl are less than or equal to the corresponding elements in bu"
+    ## set data struct
+    coeff = coeffUnion(
+        G = nothing,
+        h = nothing,
+        m = m,
+        n = n,
+        d_G = G_gpu,
+        d_h = h_gpu
+    )
+    coeffTrans = coeffUnion(
+        G = nothing,
+        h = nothing,
+        m = m,
+        n = n,
+        d_G = coeff.d_G',
+        d_h = coeff.d_h
+    )
+    x_soc_cone_indices_start, x_soc_cone_indices_end, x_rsoc_cone_indices_start, x_rsoc_cone_indices_end, x_exp_cone_indices_start, x_exp_cone_indices_end, x_dual_exp_cone_indices_start, x_dual_exp_cone_indices_end = 
+    recover_soc_cone_rotated_exp_cone_indices(
+        zero_indices = 0,
+        boxs_indices = length(bl_gpu),
+        q = soc_x,
+        rq = rsoc_x,
+        exp_q = exp_x,
+        dual_exp_q = dual_exp_x
+    )
+    y_soc_cone_indices_start, y_soc_cone_indices_end, y_rsoc_cone_indices_start, y_rsoc_cone_indices_end, y_exp_cone_indices_start, y_exp_cone_indices_end, y_dual_exp_cone_indices_start, y_dual_exp_cone_indices_end = 
+    recover_soc_cone_rotated_exp_cone_indices(
+        zero_indices = mGzero,
+        boxs_indices = mGnonnegative,
+        q = socG,
+        rq = rsocG,
+        exp_q = expG,
+        dual_exp_q = dual_expG
+    )
+    Dl_struct = dualVector(
+        y = Dl_gpu,
+        m = m,
+        mGzero = mGzero,
+        mGnonnegative = mGnonnegative,
+        soc_cone_indices_start = y_soc_cone_indices_start,
+        soc_cone_indices_end = y_soc_cone_indices_end,
+        rsoc_cone_indices_start = y_rsoc_cone_indices_start,
+        rsoc_cone_indices_end = y_rsoc_cone_indices_end,
+        exp_cone_indices_start = y_exp_cone_indices_start,
+        exp_cone_indices_end = y_exp_cone_indices_end,
+        dual_exp_cone_indices_start = y_dual_exp_cone_indices_start,
+        dual_exp_cone_indices_end = y_dual_exp_cone_indices_end
+    )
+    Dr_struct = primalVector(
+        x = Dr_gpu,
+        box_index = length(bl_gpu),
+        soc_cone_indices_start = x_soc_cone_indices_start,
+        soc_cone_indices_end = x_soc_cone_indices_end,
+        rsoc_cone_indices_start = x_rsoc_cone_indices_start,
+        rsoc_cone_indices_end = x_rsoc_cone_indices_end,
+        exp_cone_indices_start = x_exp_cone_indices_start,
+        exp_cone_indices_end = x_exp_cone_indices_end,
+        dual_exp_cone_indices_start = x_dual_exp_cone_indices_start,
+        dual_exp_cone_indices_end = x_dual_exp_cone_indices_end
+    )
+    diagonal_scale = Diagonal_preconditioner(
+        Dl = Dl_struct,
+        Dr = Dr_struct,
+        m = m,
+        n = n,
+        len_soc_x = length(soc_x),
+        len_rsoc_x = length(rsoc_x)
+    )
+    data = probData_from_gpu_data(
+        m = m,
+        n = n,
+        nb = nb,
+        c_gpu = c_gpu,
+        coeff = coeff,
+        coeffTrans = coeffTrans,
+        GlambdaMax = 0.0, # initialize to zero
+        GlambdaMax_flag = 0,
+        bl_gpu = bl_gpu,
+        bu_gpu = bu_gpu,
+        diagonal_scale = diagonal_scale,
+        raw_data = nothing
+    )
+    if use_preconditioner
+        raw_data = create_raw_data_from_gpu_data(
+            m = m,
+            n = n,
+            nb = nb,
+            c_gpu = deepcopy(c_gpu),
+            coeff = coeff,
+            bl_gpu = deepcopy(bl_gpu),
+            bu_gpu = deepcopy(bu_gpu),
+            hNrm1 = data.hNrm1,
+            cNrm1 = data.cNrm1,
+            hNrmInf = data.hNrmInf,
+            cNrmInf = data.cNrmInf
+        )
+        data.raw_data = raw_data
+    end
+    primal_sol_struct = primalVector(
+        x = deepcopy(primal_sol_gpu),
+        box_index = length(bl_gpu),
+        soc_cone_indices_start = x_soc_cone_indices_start,
+        soc_cone_indices_end = x_soc_cone_indices_end,
+        rsoc_cone_indices_start = x_rsoc_cone_indices_start,
+        rsoc_cone_indices_end = x_rsoc_cone_indices_end,
+        exp_cone_indices_start = x_exp_cone_indices_start,
+        exp_cone_indices_end = x_exp_cone_indices_end,
+        dual_exp_cone_indices_start = x_dual_exp_cone_indices_start,
+        dual_exp_cone_indices_end = x_dual_exp_cone_indices_end
+    )
+    primal_sol_lag_struct = primalVector(
+        x = deepcopy(primal_sol_gpu),
+        box_index = length(bl_gpu),
+        soc_cone_indices_start = x_soc_cone_indices_start,
+        soc_cone_indices_end = x_soc_cone_indices_end,
+        rsoc_cone_indices_start = x_rsoc_cone_indices_start,
+        rsoc_cone_indices_end = x_rsoc_cone_indices_end,
+        exp_cone_indices_start = x_exp_cone_indices_start,
+        exp_cone_indices_end = x_exp_cone_indices_end,
+        dual_exp_cone_indices_start = x_dual_exp_cone_indices_start,
+        dual_exp_cone_indices_end = x_dual_exp_cone_indices_end
+    )
+    primal_sol_mean_struct = primalVector(
+        x = deepcopy(primal_sol_gpu),
+        box_index = length(bl_gpu),
+        soc_cone_indices_start = x_soc_cone_indices_start,
+        soc_cone_indices_end = x_soc_cone_indices_end,
+        rsoc_cone_indices_start = x_rsoc_cone_indices_start,
+        rsoc_cone_indices_end = x_rsoc_cone_indices_end,
+        exp_cone_indices_start = x_exp_cone_indices_start,
+        exp_cone_indices_end = x_exp_cone_indices_end,
+        dual_exp_cone_indices_start = x_dual_exp_cone_indices_start,
+        dual_exp_cone_indices_end = x_dual_exp_cone_indices_end
+    )
+    ## set solution struct
+    if use_preconditioner
+        # println("before primal_sol_struct")
+        # CUDA.memory_status()
+        x = solVecPrimal(
+            primal_sol = primal_sol_struct,
+            primal_sol_lag = primal_sol_lag_struct,
+            primal_sol_mean = primal_sol_mean_struct,
+            box_index = length(bl_gpu),
+            bl = data.d_bl,
+            bu = data.d_bu,
+            soc_cone_indices_start = x_soc_cone_indices_start,
+            soc_cone_indices_end = x_soc_cone_indices_end,
+            rsoc_cone_indices_start = x_rsoc_cone_indices_start,
+            rsoc_cone_indices_end = x_rsoc_cone_indices_end,
+            exp_cone_indices_start = x_exp_cone_indices_start,
+            exp_cone_indices_end = x_exp_cone_indices_end,
+            dual_exp_cone_indices_start = x_dual_exp_cone_indices_start,
+            dual_exp_cone_indices_end = x_dual_exp_cone_indices_end,
+            proj! = x -> println("proj! not implemented"),
+            slack_proj! = x -> println("slack_proj! not implemented"),
+            proj_diagonal! = x -> println("proj_diagonal! not implemented"),
+            recovered_primal = solVecPrimalRecovered(deepCopyPrimalVector(primal_sol_struct), deepCopyPrimalVector(primal_sol_struct))
+        )
+        # println("after primal_sol_struct")
+        # CUDA.memory_status()
+    else
+        x = solVecPrimal(
+            primal_sol = primal_sol_struct,
+            primal_sol_lag = primal_sol_lag_struct,
+            primal_sol_mean = primal_sol_mean_struct,
+            box_index = length(bl_gpu),
+            bl = data.d_bl,
+            bu = data.d_bu,
+            soc_cone_indices_start = x_soc_cone_indices_start,
+            soc_cone_indices_end = x_soc_cone_indices_end,
+            rsoc_cone_indices_start = x_rsoc_cone_indices_start,
+            rsoc_cone_indices_end = x_rsoc_cone_indices_end,
+            exp_cone_indices_start = x_exp_cone_indices_start,
+            exp_cone_indices_end = x_exp_cone_indices_end,
+            dual_exp_cone_indices_start = x_dual_exp_cone_indices_start,
+            dual_exp_cone_indices_end = x_dual_exp_cone_indices_end,
+            proj! = x -> println("proj! not implemented"),
+            slack_proj! = x -> println("slack_proj! not implemented"),
+            proj_diagonal! = x -> println("proj_diagonal! not implemented"),
+            recovered_primal = nothing
+        )
+    end
+    
+    dual_sol_struct = dualVector(
+        y = deepcopy(dual_sol_gpu),
+        m = m,
+        mGzero = mGzero,
+        mGnonnegative = mGnonnegative,
+        soc_cone_indices_start = y_soc_cone_indices_start,
+        soc_cone_indices_end = y_soc_cone_indices_end,
+        rsoc_cone_indices_start = y_rsoc_cone_indices_start,
+        rsoc_cone_indices_end = y_rsoc_cone_indices_end,
+        exp_cone_indices_start = y_exp_cone_indices_start,
+        exp_cone_indices_end = y_exp_cone_indices_end,
+        dual_exp_cone_indices_start = y_dual_exp_cone_indices_start,
+        dual_exp_cone_indices_end = y_dual_exp_cone_indices_end
+    )
+    dual_sol_lag_struct = dualVector(
+        y = deepcopy(dual_sol_gpu),
+        m = m,
+        mGzero = mGzero,
+        mGnonnegative = mGnonnegative,
+        soc_cone_indices_start = y_soc_cone_indices_start,
+        soc_cone_indices_end = y_soc_cone_indices_end,
+        rsoc_cone_indices_start = y_rsoc_cone_indices_start,
+        rsoc_cone_indices_end = y_rsoc_cone_indices_end,
+        exp_cone_indices_start = y_exp_cone_indices_start,
+        exp_cone_indices_end = y_exp_cone_indices_end,
+        dual_exp_cone_indices_start = y_dual_exp_cone_indices_start,
+        dual_exp_cone_indices_end = y_dual_exp_cone_indices_end
+    )
+    dual_sol_mean_struct = dualVector(
+        y = deepcopy(dual_sol_gpu),
+        m = m,
+        mGzero = mGzero,
+        mGnonnegative = mGnonnegative,
+        soc_cone_indices_start = y_soc_cone_indices_start,
+        soc_cone_indices_end = y_soc_cone_indices_end,
+        rsoc_cone_indices_start = y_rsoc_cone_indices_start,
+        rsoc_cone_indices_end = y_rsoc_cone_indices_end,
+        exp_cone_indices_start = y_exp_cone_indices_start,
+        exp_cone_indices_end = y_exp_cone_indices_end,
+        dual_exp_cone_indices_start = y_dual_exp_cone_indices_start,
+        dual_exp_cone_indices_end = y_dual_exp_cone_indices_end
+    )
+    if use_preconditioner
+        y = solVecDual(
+            dual_sol = dual_sol_struct,
+            dual_sol_lag = dual_sol_lag_struct,
+            dual_sol_mean = dual_sol_mean_struct,
+            mGzero = mGzero,
+            mGnonnegative = mGnonnegative,
+            soc_cone_indices_start = y_soc_cone_indices_start,
+            soc_cone_indices_end = y_soc_cone_indices_end,
+            rsoc_cone_indices_start = y_rsoc_cone_indices_start,
+            rsoc_cone_indices_end = y_rsoc_cone_indices_end,
+            exp_cone_indices_start = y_exp_cone_indices_start,
+            exp_cone_indices_end = y_exp_cone_indices_end,
+            dual_exp_cone_indices_start = y_dual_exp_cone_indices_start,
+            dual_exp_cone_indices_end = y_dual_exp_cone_indices_end,
+            slack = solVecPrimal(
+                primal_sol = deepCopyPrimalVector(primal_sol_struct),
+                primal_sol_lag = deepCopyPrimalVector(primal_sol_lag_struct),
+                primal_sol_mean = deepCopyPrimalVector(primal_sol_mean_struct),
+                box_index = length(bl_gpu),
+                bl = data.d_bl,
+                bu = data.d_bu,
+                soc_cone_indices_start = x_soc_cone_indices_start,
+                soc_cone_indices_end = x_soc_cone_indices_end,
+                rsoc_cone_indices_start = x_rsoc_cone_indices_start,
+                rsoc_cone_indices_end = x_rsoc_cone_indices_end,
+                exp_cone_indices_start = x_exp_cone_indices_start,
+                exp_cone_indices_end = x_exp_cone_indices_end,
+                dual_exp_cone_indices_start = x_dual_exp_cone_indices_start,
+                dual_exp_cone_indices_end = x_dual_exp_cone_indices_end,
+                proj! = x -> println("proj! not implemented"),
+                slack_proj! = x -> println("slack_proj! not implemented"),
+                proj_diagonal! = x -> println("proj_diagonal! not implemented"),
+                recovered_primal = nothing
+            ),
+            proj! = x -> println("proj! not implemented"),
+            con_proj! = x -> println("con_proj! not implemented"),
+            proj_diagonal! = x -> println("proj_diagonal! not implemented"),
+            recovered_dual = solVecDualRecovered(deepCopyDualVector(dual_sol_struct), deepCopyDualVector(dual_sol_struct))
+        )
+        println("norm(y.dual_sol.y, Inf): $(CUDA.norm(y.dual_sol.y, Inf))")
+        dual_sol_temp = solVecDual(
+            dual_sol = deepCopyDualVector(dual_sol_struct),
+            dual_sol_lag = deepCopyDualVector(dual_sol_lag_struct),
+            dual_sol_mean = deepCopyDualVector(dual_sol_mean_struct),
+            mGzero = mGzero,
+            mGnonnegative = mGnonnegative,
+            soc_cone_indices_start = y_soc_cone_indices_start,
+            soc_cone_indices_end = y_soc_cone_indices_end,
+            rsoc_cone_indices_start = y_rsoc_cone_indices_start,
+            rsoc_cone_indices_end = y_rsoc_cone_indices_end,
+            exp_cone_indices_start = y_exp_cone_indices_start,
+            exp_cone_indices_end = y_exp_cone_indices_end,
+            dual_exp_cone_indices_start = y_dual_exp_cone_indices_start,
+            dual_exp_cone_indices_end = y_dual_exp_cone_indices_end,
+            slack = nothing,
+            proj! = x -> println("proj! not implemented"),
+            con_proj! = x -> println("con_proj! not implemented"),
+            proj_diagonal! = x -> println("proj_diagonal! not implemented"),
+            recovered_dual = nothing
+        )
+    else
+        y = solVecDual(
+            dual_sol = dual_sol_struct,
+            dual_sol_lag = dual_sol_lag_struct,
+            dual_sol_mean = dual_sol_mean_struct,
+            mGzero = mGzero,
+            mGnonnegative = mGnonnegative,
+            soc_cone_indices_start = y_soc_cone_indices_start,
+            soc_cone_indices_end = y_soc_cone_indices_end,
+            rsoc_cone_indices_start = y_rsoc_cone_indices_start,
+            rsoc_cone_indices_end = y_rsoc_cone_indices_end,
+            exp_cone_indices_start = y_exp_cone_indices_start,
+            exp_cone_indices_end = y_exp_cone_indices_end,
+            dual_exp_cone_indices_start = y_dual_exp_cone_indices_start,
+            dual_exp_cone_indices_end = y_dual_exp_cone_indices_end,
+            slack = solVecPrimal(
+                primal_sol = deepCopyPrimalVector(primal_sol_struct),
+                primal_sol_lag = deepCopyPrimalVector(primal_sol_lag_struct),
+                primal_sol_mean = deepCopyPrimalVector(primal_sol_mean_struct),
+                box_index = length(bl_cpu),
+                bl = data.d_bl,
+                bu = data.d_bu,
+                soc_cone_indices_start = x_soc_cone_indices_start,
+                soc_cone_indices_end = x_soc_cone_indices_end,
+                proj! = x -> println("proj! not implemented"),
+                slack_proj! = x -> println("slack_proj! not implemented"),
+                proj_diagonal! = x -> println("proj_diagonal! not implemented"),
+                recovered_primal = nothing
+            ),
+            proj! = x -> println("proj! not implemented"),
+            con_proj! = x -> println("con_proj! not implemented"),
+            proj_diagonal! = x -> println("proj_diagonal! not implemented"),
+            recovered_dual = nothing
+        )
+        dual_sol_temp = solVecDual(
+            dual_sol = deepCopyDualVector(dual_sol_struct),
+            dual_sol_lag = deepCopyDualVector(dual_sol_lag_struct),
+            dual_sol_mean = deepCopyDualVector(dual_sol_mean_struct),
+            mGzero = mGzero,
+            mGnonnegative = mGnonnegative,
+            soc_cone_indices_start = y_soc_cone_indices_start,
+            soc_cone_indices_end = y_soc_cone_indices_end,
+            rsoc_cone_indices_start = y_rsoc_cone_indices_start,
+            rsoc_cone_indices_end = y_rsoc_cone_indices_end,
+            exp_cone_indices_start = y_exp_cone_indices_start,
+            exp_cone_indices_end = y_exp_cone_indices_end,
+            dual_exp_cone_indices_start = y_dual_exp_cone_indices_start,
+            dual_exp_cone_indices_end = y_dual_exp_cone_indices_end,
+            slack = nothing,
+            proj! = x -> println("proj! not implemented"),
+            con_proj! = x -> println("con_proj! not implemented"),
+            proj_diagonal! = x -> println("proj_diagonal! not implemented"),
+            recovered_dual = nothing
+        )
+    end
+
+    # set the parameters struct
+    params = PDHGCLPParameters(max_outer_iter = max_outer_iter,
+                                max_inner_iter = max_inner_iter,
+                                rel_tol = rel_tol,
+                                abs_tol = abs_tol,
+                                eps_primal_infeasible_low_acc = eps_primal_infeasible_low_acc,
+                                eps_dual_infeasible_low_acc = eps_dual_infeasible_low_acc,
+                                eps_primal_infeasible_high_acc = eps_primal_infeasible_high_acc,
+                                eps_dual_infeasible_high_acc = eps_dual_infeasible_high_acc,
+                                sigma = 0.0,
+                                tau = 0.0,
+                                theta = 0.5,
+                                verbose = verbose,
+                                use_kkt_restart = use_kkt_restart,
+                                kkt_restart_freq = kkt_restart_freq,
+                                use_duality_gap_restart = use_duality_gap_restart,
+                                duality_gap_restart_freq = duality_gap_restart_freq,
+                                check_terminate_freq = check_terminate_freq,
+                                print_freq = print_freq,
+                                time_limit = time_limit);
+    # set the info struct
+    info = PDHGCLPInfo(iter = 0,
+                        convergeInfo = Vector{PDHGCLPConvergeInfo}([]),
+                        infeaInfo = Vector{PDHGCLPInfeaInfo}([]),
+                        time = 0.0,
+                        start_time = time(),
+                        restart_used = 0,
+                        exit_status = :continue,
+                        pObj = 0.0,
+                        dObj = 0.0,
+                        exit_code = 0);
+    sol = Solution(x = x, y = y, params = params, info = info, dual_sol_temp = dual_sol_temp);
+
+    solver = rpdhgSolver(
+        data = data,
+        sol = sol,
+        primalMV! = x -> println("primalMV! not implemented"),
+        adjointMV! = x -> println("adjointMV! not implemented"),
+        AtAMV! = x -> println("AtAMV! not implemented"),
+        addCoeffd! = x-> println("addCoeffd! not implemented"),
+        dotCoeffd = x-> println("dotCoeffd not implemented")
+    )
+
+    if use_preconditioner
+        # scale data
+        nrm1G = CUDA.norm(solver.data.coeff.d_G, 1)
+        nrmInfG = CUDA.norm(solver.data.coeff.d_G, Inf)
+        # @info ("initial nrm1G: $(nrm1G), initial nrmInfG: $(nrmInfG)")
+        # @info ("initial nrm1c: $(CUDA.norm(solver.data.d_c, 1))")
+        # @info ("initial nrm1h: $(CUDA.norm(solver.data.coeff.d_h, 1))")
+        # @info ("initial nrmInfc: $(CUDA.norm(solver.data.d_c, Inf))")
+        if rescaling_method == :ruiz
+            rescale_problem!(
+                l_inf_ruiz_iterations = 10,
+                pock_chambolle_alpha = nothing,
+                data = solver.data,
+                Dr_product = solver.data.diagonal_scale.Dr_product.x,
+                Dl_product = solver.data.diagonal_scale.Dl_product.y,
+                sol = solver.sol.x,
+                dual_sol = solver.sol.y
+            )
+        elseif rescaling_method == :pock_chambolle
+            rescale_problem!(
+                l_inf_ruiz_iterations = -1,
+                pock_chambolle_alpha = 1.0,
+                data = solver.data,
+                Dr_product = solver.data.diagonal_scale.Dr_product.x,
+                Dl_product = solver.data.diagonal_scale.Dl_product.y,
+                sol = solver.sol.x,
+                dual_sol = solver.sol.y
+            )
+        elseif rescaling_method == :ruiz_pock_chambolle
+            rescale_problem!(
+                l_inf_ruiz_iterations = 10,
+                pock_chambolle_alpha = 1.0,
+                data = solver.data,
+                Dr_product = solver.data.diagonal_scale.Dr_product.x,
+                Dl_product = solver.data.diagonal_scale.Dl_product.y,
+                sol = solver.sol.x,
+                dual_sol = solver.sol.y,
+                variable_rescaling = solver.data.diagonal_scale.Dr_temp.x,
+                constraint_rescaling_G = solver.data.diagonal_scale.Dl_temp.y
+            )
+        else
+            throw(ArgumentError("The rescaling method is not defined, two choices: :ruiz, :pock_chambolle, :ruiz_pock_chambolle"))
+        end
+        println("scale_preconditioner")
+        println("before scale_preconditioner norm(y.dual_sol.y, Inf): $(CUDA.norm(solver.sol.y.dual_sol.y, Inf))")
+        scale_preconditioner!(
+            Dr_product = solver.data.diagonal_scale.Dr_product.x,
+            Dl_product = solver.data.diagonal_scale.Dl_product.y,
+            Dr_product_inv_normalized = solver.data.diagonal_scale.Dr_product_inv_normalized.x,
+            Dr_product_normalized = solver.data.diagonal_scale.Dr_product_normalized.x,
+            Dl_product_inv_normalized = solver.data.diagonal_scale.Dl_product_inv_normalized.y,
+            Dr_product_inv_normalized_squared = solver.data.diagonal_scale.Dr_product_inv_normalized_squared.x,
+            Dr_product_normalized_squared = solver.data.diagonal_scale.Dr_product_normalized_squared.x,
+            Dl_product_inv_normalized_squared = solver.data.diagonal_scale.Dl_product_inv_normalized_squared.y,
+            primal_sol = solver.sol.x,
+            dual_sol = solver.sol.y,
+            primalConstScale = solver.data.diagonal_scale.primalConstScale,
+            dualConstScale = solver.data.diagonal_scale.dualConstScale
+        )
+        if verbose == 2
+            @info ("max Dr_product:$(CUDA.maximum(solver.data.diagonal_scale.Dr_product.x))")
+            @info ("norm Dr_product:$(CUDA.norm(solver.data.diagonal_scale.Dr_product.x, 2))")
+            @info ("max Dl_product:$(CUDA.maximum(solver.data.diagonal_scale.Dl_product.y))")
+            @info ("norm Dl_product:$(CUDA.norm(solver.data.diagonal_scale.Dl_product.y, 2))")
+            @info ("after scaling, norm1 c: $(CUDA.norm(solver.data.d_c, 1))")
+            @info ("after scaling, normInf c: $(CUDA.norm(solver.data.d_c, Inf))")
+            @info ("after scaling, norm1 G: $(CUDA.norm(solver.data.coeff.d_G, 1))")
+            @info ("after scaling, normInf G: $(CUDA.norm(solver.data.coeff.d_G, Inf))")
+        end
+    end # end if use_preconditioner
+
+    solver_start_time = time()
+    setFunctionPointerSolver!(solver)
+    # calculate the initial step size, for binary search
+    # solver.data.GlambdaMax, solver.data.GlambdaMax_flag = power_method!(solver.data.coeffTrans, solver.data.coeff, solver.AtAMV!, dual_sol_lag_struct)
+    # @info ("sqrt(max eigenvalue of GtG): $(solver.data.GlambdaMax)")
+    # if solver.data.GlambdaMax_flag == 0
+    #     solver.sol.params.sigma = 0.9 / solver.data.GlambdaMax
+    #     solver.sol.params.tau = 0.9 / solver.data.GlambdaMax
+    # else
+    #     solver.sol.params.sigma = 0.8 / solver.data.GlambdaMax
+    #     solver.sol.params.tau = 0.8 / solver.data.GlambdaMax
+    # end
+    solver.sol.params.sigma = 0.9
+    solver.sol.params.tau = 0.9
+
+    # new a struct to save convergence information
+    push!(sol.info.convergeInfo, PDHGCLPConvergeInfo())
+    push!(sol.info.convergeInfo, PDHGCLPConvergeInfo())
+    push!(sol.info.infeaInfo, PDHGCLPInfeaInfo()) # infeasibility info for one sequence
+    push!(sol.info.infeaInfo, PDHGCLPInfeaInfo()) # infeasibility info for the other sequence
+    if use_preconditioner
+        println("before recover_solution norm(y.dual_sol.y, Inf): $(CUDA.norm(solver.sol.y.dual_sol.y, Inf))")
+        recover_solution!(
+            data = solver.data,
+            Dr_product = solver.data.diagonal_scale.Dr_product.x,
+            Dl_product = solver.data.diagonal_scale.Dl_product.y,
+            sol = solver.sol.x,
+            dual_sol = solver.sol.y
+        )
+        converge_info_calculation_diagonal!(solver = solver,
+                                            primal_sol = sol.x.recovered_primal.primal_sol,
+                                            dual_sol = sol.y.recovered_dual.dual_sol,
+                                            slack = sol.y.slack,
+                                            dual_sol_temp = sol.y,
+                                            converge_info = sol.info.convergeInfo[1])
+    else
+        converge_info_calculation(solver = solver,
+                                primal_sol = sol.x.primal_sol,
+                                dual_sol = sol.y.dual_sol,
+                                slack = sol.y.slack,
+                                dual_sol_temp = sol.y,
+                                converge_info = sol.info.convergeInfo[1])
+    end
+    sol.info.start_time = solver_start_time;
+    sol.info.time = time() - solver_start_time;
+    if sol.params.verbose > 0
+        @info ("==================================================")
+    end
+    # main loop, all data and variables are put in ``solver`` and ``sol`` two structs
+
+    if method == :halpern 
+        @info ("Start halpern method, which is not test yet")
+    elseif method == :average
+        if !use_preconditioner && !use_adaptive_restart && !use_adaptive_step_size_weight
+            if verbose > 0
+                @info ("Start average method without preconditioner, adaptive restart and adaptive step size weight")
+            end
+            main_loop! = pdhg_main_iter_average_no_restart!
+        elseif use_preconditioner && !use_adaptive_restart && !use_adaptive_step_size_weight
+            if verbose > 0
+                @info ("Start average method with preconditioner, without adaptive restart and adaptive step size weight")
+            end
+            main_loop! = pdhg_main_iter_average_diagonal_rescaling_no_restarts!
+        elseif use_preconditioner && use_adaptive_restart && !use_adaptive_step_size_weight
+            if verbose > 0
+                @info ("Start average method with preconditioner, adaptive restart and without adaptive step size weight")
+            end
+            main_loop! = pdhg_main_iter_average_diagonal_rescaling_adaptive_restarts!
+        elseif use_preconditioner && use_adaptive_restart && use_adaptive_step_size_weight && !use_resolving
+            if verbose > 0
+                @info ("Start average method with preconditioner, adaptive restart and adaptive step size weight")
+            end
+            main_loop! = pdhg_main_iter_average_diagonal_rescaling_restarts_adaptive_weight!
+        elseif use_preconditioner && use_adaptive_restart && use_adaptive_step_size_weight && use_resolving && !use_accelerated && !use_aggressive
+            if verbose > 0
+                @info ("Start average method with preconditioner, adaptive restart, adaptive step size weight and resolving")
+            end
+            main_loop! = pdhg_main_iter_average_diagonal_rescaling_restarts_adaptive_weight_resolving!
+        elseif use_preconditioner && use_adaptive_restart && use_adaptive_step_size_weight && use_resolving && use_accelerated && !use_aggressive
+            if verbose > 0
+                @info ("Start average method with preconditioner, adaptive restart, adaptive step size weight and accelerated")
+            end
+            main_loop! = pdhg_main_iter_average_diagonal_rescaling_restarts_adaptive_weight_resolving_accelerated!
+        elseif use_preconditioner && use_adaptive_restart && use_adaptive_step_size_weight && use_resolving && !use_accelerated && use_aggressive
+            if verbose > 0
+                @info ("Start average method with preconditioner, adaptive restart, adaptive step size weight, resolving and accelerated")
+            end
+            main_loop! = pdhg_main_iter_average_diagonal_rescaling_restarts_adaptive_weight_resolving_aggressive!
+        else
+            throw(ArgumentError("The combination of options is not supported."))
+        end
+    end
+    if verbose > 0
+        printInfo(infoAll = sol.info);
+    end
+    if verbose > 0
+        CUDA.memory_status()
+    end
+    main_loop!(solver = solver)
+    if verbose > 0
+        CUDA.memory_status()
+    end
+    destroy_cublas_handle(handle)
+    @info ("===============================================")
+    infoSummary(info = sol.info)
+    if use_preconditioner
+        @info (" norm(sol.x.recovered_primal.primal_sol.x, Inf): $(CUDA.norm(sol.x.recovered_primal.primal_sol.x, Inf))")
+        @info (" norm(sol.y.recovered_dual.dual_sol.y, Inf): $(CUDA.norm(sol.y.recovered_dual.dual_sol.y, Inf))")
+    else
+        @info (" norm(sol.x.primal_sol.x, Inf): $(CUDA.norm(sol.x.primal_sol.x, Inf))")
+        @info (" norm(sol.y.dual_sol.y, Inf): $(CUDA.norm(sol.y.dual_sol.y, Inf))")
+    end
+    @info ("time for projection: $(time_proj)")
+    @info ("time for iterative: $(time_iterative)")
+    @info ("time for restart check: $(time_restart_check)")
+    @info ("time for exit check: $(time_exit_check)")
+    @info ("time for print info calculation: $(time_print_info_cal)")
+    if logfile_name !== nothing
+        close(logfile)
+    end
+    GC.gc()
+    CUDA.reclaim()
+    return solver.sol
+end # end rpdhg_cpu_solve
+
 
 """
     rpdhg_cpu_solve()
@@ -585,7 +1330,7 @@ function rpdhg_gpu_solve(;
         error("m does not match the size of G")
     end
     if m != mGzero + mGnonnegative + sum(socG) + sum(rsocG) + (expG + dual_expG) * 3
-        error("m does not match the sum of mGzero, mGnonnegative, socG, rsocG, and expG + dual_expG * 3")
+        error("m does not match the sum of mGzero, mGnonnegative, socG, rsocG, and (expG + dual_expG) * 3")
     end
     if method != :average && method != :halpern
         throw(ArgumentError("method only available for :average and :halpern"))
@@ -695,7 +1440,7 @@ function rpdhg_gpu_solve(;
         len_soc_x = length(soc_x),
         len_rsoc_x = length(rsoc_x)
     )
-    data = probData(
+    data = probData_from_cpu_data(
         m = m,
         n = n,
         nb = nb,
@@ -710,7 +1455,7 @@ function rpdhg_gpu_solve(;
         raw_data = nothing
     )
     if use_preconditioner
-        raw_data = create_raw_data(
+        raw_data = create_raw_data_from_cpu_data(
             m = m,
             n = n,
             nb = nb,
@@ -1103,6 +1848,7 @@ function rpdhg_gpu_solve(;
     push!(sol.info.infeaInfo, PDHGCLPInfeaInfo()) # infeasibility info for one sequence
     push!(sol.info.infeaInfo, PDHGCLPInfeaInfo()) # infeasibility info for the other sequence
     if use_preconditioner
+        println("before recover_solution norm(y.dual_sol.y, Inf): $(CUDA.norm(solver.sol.y.dual_sol.y, Inf))")
         recover_solution!(
             data = solver.data,
             Dr_product = solver.data.diagonal_scale.Dr_product.x,
@@ -1116,6 +1862,11 @@ function rpdhg_gpu_solve(;
                                             slack = sol.y.slack,
                                             dual_sol_temp = sol.y,
                                             converge_info = sol.info.convergeInfo[1])
+        println("norm(sol.x.recovered_primal.primal_sol.x, Inf): $(CUDA.norm(sol.x.recovered_primal.primal_sol.x, Inf))")
+        println("norm(sol.y.recovered_dual.dual_sol.y, Inf): $(CUDA.norm(sol.y.recovered_dual.dual_sol.y, Inf))")
+        println("norm(sol.x.primal_sol.x, Inf): $(CUDA.norm(sol.x.primal_sol.x, Inf))")
+        println("norm(sol.y.dual_sol.y, Inf): $(CUDA.norm(sol.y.dual_sol.y, Inf))")
+        printInfo(infoAll = sol.info);
     else
         converge_info_calculation(solver = solver,
                                 primal_sol = sol.x.primal_sol,
