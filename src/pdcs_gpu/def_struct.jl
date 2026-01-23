@@ -1050,3 +1050,168 @@ mutable struct rpdhgSolver
     end
 end
 
+mutable struct PDCS_GPU_Solver
+    n::Integer
+    m::Integer
+    nb::Integer
+    c::Union{Vector{rpdhg_float}, CuArray}
+    G::Union{AbstractMatrix{rpdhg_float}, CUDA.CUSPARSE.CuSparseMatrixCSR{Float64,Int32}, CUDA.CUSPARSE.CuSparseMatrixCSR{Float64,Int64}}
+    h::Union{Vector{rpdhg_float}, CuArray}
+    mGzero::Integer
+    mGnonnegative::Integer
+    socG::Vector{Integer}
+    rsocG::Vector{Integer}
+    expG::Integer
+    dual_expG::Integer
+    bl::Union{Vector{rpdhg_float}, CuArray}
+    bu::Union{Vector{rpdhg_float}, CuArray}
+    soc_x::Vector{Integer}
+    rsoc_x::Vector{Integer}
+    exp_x::Integer
+    dual_exp_x::Integer
+    Dl::Union{Vector{rpdhg_float}, CuArray}
+    Dr::Union{Vector{rpdhg_float}, CuArray}
+    rescaling_method::Symbol
+    use_preconditioner::Bool
+    use_adaptive_restart::Bool
+    use_adaptive_step_size_weight::Bool
+    use_aggressive::Bool
+    use_accelerated::Bool
+    use_resolving::Bool
+    primal_sol::Union{Vector{rpdhg_float}, CuArray}
+    dual_sol::Union{Vector{rpdhg_float}, CuArray}
+    warm_start::Bool
+    max_outer_iter::Integer
+    max_inner_iter::Integer
+    abs_tol::rpdhg_float
+    rel_tol::rpdhg_float
+    eps_primal_infeasible_low_acc::rpdhg_float
+    eps_dual_infeasible_low_acc::rpdhg_float
+    eps_primal_infeasible_high_acc::rpdhg_float
+    eps_dual_infeasible_high_acc::rpdhg_float
+    print_freq::Integer
+    check_terminate_freq::Integer
+    verbose::Integer
+    time_limit::Float64
+    method::Symbol
+    logfile_name::Union{String, Nothing}
+    use_kkt_restart::Bool
+    kkt_restart_freq::Integer
+    use_duality_gap_restart::Bool
+    duality_gap_restart_freq::Integer
+    function PDCS_GPU_Solver(; 
+        n::Integer,
+        m::Integer,
+        nb::Integer,
+        c::Union{Vector{rpdhg_float}, CuArray},
+        G::AbstractMatrix{rpdhg_float},
+        h::Union{Vector{rpdhg_float}, CuArray},
+        mGzero::Integer, # m of Q for zero cone
+        mGnonnegative::Integer, # m of Q for positive cone
+        socG::Vector{<:Integer},
+        rsocG::Vector{<:Integer},
+        expG::Integer,
+        dual_expG::Integer,
+        bl::Union{Vector{rpdhg_float}, CuArray},
+        bu::Union{Vector{rpdhg_float}, CuArray},
+        soc_x::Vector{<:Integer},
+        rsoc_x::Vector{<:Integer},
+        exp_x::Integer = 0,
+        dual_exp_x::Integer = 0,
+        Dl::Union{Vector{rpdhg_float}, CuArray} = ones(m),
+        Dr::Union{Vector{rpdhg_float}, CuArray} = ones(n),
+        rescaling_method::Symbol = :ruiz_pock_chambolle,
+        use_preconditioner::Bool = true,
+        use_adaptive_restart::Bool = true,
+        use_adaptive_step_size_weight::Bool = true,
+        use_aggressive::Bool = true,
+        use_accelerated::Bool = false,
+        use_resolving::Bool = true,
+        primal_sol::Union{Vector{rpdhg_float}, CuArray} = zeros(n),
+        dual_sol::Union{Vector{rpdhg_float}, CuArray} = zeros(m),
+        warm_start::Bool = false,
+        max_outer_iter::Integer = 10000,
+        max_inner_iter::Integer = 500000,
+        abs_tol::rpdhg_float = 1e-6,
+        rel_tol::rpdhg_float = 1e-6,
+        eps_primal_infeasible_low_acc::rpdhg_float = 1e-12,
+        eps_dual_infeasible_low_acc::rpdhg_float = 1e-12,
+        eps_primal_infeasible_high_acc::rpdhg_float = 1e-16,
+        eps_dual_infeasible_high_acc::rpdhg_float = 1e-16,
+        print_freq::Integer = 2000,
+        check_terminate_freq::Integer = 2000,
+        verbose::Integer = 1,
+        time_limit::Float64 = Inf,
+        method::Symbol = :average,
+        logfile_name::Union{String, Nothing} = nothing,
+        use_kkt_restart::Bool = false,
+        kkt_restart_freq::Integer = 2000,
+        use_duality_gap_restart::Bool = true,
+        duality_gap_restart_freq::Integer = 2000
+    )
+        if c isa CuArray
+            if isa(Dl, Vector{rpdhg_float})
+                Dl = CuArray(Dl)
+            end
+            if isa(Dr, Vector{rpdhg_float})
+                Dr = CuArray(Dr)
+            end
+            if isa(primal_sol, Vector{rpdhg_float})
+                primal_sol = CuArray(primal_sol)
+            end
+            if isa(dual_sol, Vector{rpdhg_float})
+                dual_sol = CuArray(dual_sol)
+            end
+        end
+        new(
+            n,
+            m,
+            nb,
+            c,
+            G,
+            h,
+            mGzero,
+            mGnonnegative,
+            socG,
+            rsocG,
+            expG,
+            dual_expG,
+            bl,
+            bu,
+            soc_x,
+            rsoc_x,
+            exp_x,
+            dual_exp_x,
+            Dl,
+            Dr,
+            rescaling_method,   
+            use_preconditioner,
+            use_adaptive_restart,
+            use_adaptive_step_size_weight,
+            use_aggressive,
+            use_accelerated,
+            use_resolving,
+            primal_sol,
+            dual_sol,
+            warm_start,
+            max_outer_iter,
+            max_inner_iter,     
+            abs_tol,
+            rel_tol,    
+            eps_primal_infeasible_low_acc,
+            eps_dual_infeasible_low_acc,
+            eps_primal_infeasible_high_acc,
+            eps_dual_infeasible_high_acc,
+            print_freq,
+            check_terminate_freq,
+            verbose,
+            time_limit,
+            method,
+            logfile_name,
+            use_kkt_restart,
+            kkt_restart_freq,
+            use_duality_gap_restart,
+            duality_gap_restart_freq,
+        )
+    end
+end

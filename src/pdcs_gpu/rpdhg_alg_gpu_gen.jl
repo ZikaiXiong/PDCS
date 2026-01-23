@@ -388,23 +388,23 @@ function rpdhg_gpu_solve_input_gpu_data(;
     n::Integer,
     m::Integer,
     nb::Integer,
-    c_gpu::CuArray{rpdhg_float},
-    G_gpu::dGType,
-    h_gpu::dhType,
+    c::CuArray{rpdhg_float},
+    G::dGType,
+    h::dhType,
     mGzero::Integer, # m of Q for zero cone
     mGnonnegative::Integer, # m of Q for positive cone
     socG::Vector{<:Integer},
     rsocG::Vector{<:Integer},
     expG::Integer,
     dual_expG::Integer,
-    bl_gpu::CuArray{rpdhg_float},
-    bu_gpu::CuArray{rpdhg_float},
+    bl::CuArray{rpdhg_float},
+    bu::CuArray{rpdhg_float},
     soc_x::Vector{<:Integer},
     rsoc_x::Vector{<:Integer},
     exp_x::Integer = 0,
     dual_exp_x::Integer = 0,
-    Dl_gpu::CuArray{rpdhg_float} = CuArray(ones(m)),
-    Dr_gpu::CuArray{rpdhg_float} = CuArray(ones(n)),
+    Dl::CuArray{rpdhg_float} = CuArray(ones(m)),
+    Dr::CuArray{rpdhg_float} = CuArray(ones(n)),
     rescaling_method::Symbol = :ruiz_pock_chambolle,
     use_preconditioner::Bool = true,
     use_adaptive_restart::Bool = true,
@@ -412,8 +412,8 @@ function rpdhg_gpu_solve_input_gpu_data(;
     use_aggressive::Bool = true,
     use_accelerated::Bool = false,
     use_resolving::Bool = true,
-    primal_sol_gpu::CuArray{rpdhg_float} = CuArray(zeros(n)),
-    dual_sol_gpu::CuArray{rpdhg_float} = CuArray(zeros(m)),
+    primal_sol::CuArray{rpdhg_float} = CuArray(zeros(n)),
+    dual_sol::CuArray{rpdhg_float} = CuArray(zeros(m)),
     warm_start::Bool = false,
     max_outer_iter::Integer = 10000,
     max_inner_iter::Integer = 500000,
@@ -500,7 +500,7 @@ dGType<:Union{
         @info ("Number of dual exp cone variables: $dual_exp_x")
         @info ("---------------------------------------------------")
     end
-    if m != size(G_gpu, 1)
+    if m != size(G, 1)
         error("m does not match the size of G")
     end
     if m != mGzero + mGnonnegative + sum(socG) + sum(rsocG) + (expG + dual_expG) * 3
@@ -520,7 +520,7 @@ dGType<:Union{
     end
 
     Random.seed!(1234)
-    if length(primal_sol_gpu) == n && length(dual_sol_gpu) == m
+    if length(primal_sol) == n && length(dual_sol) == m
         if !warm_start
             if verbose > 0
                 @info ("Warm start not enabled. Ignoring warm start values.")
@@ -528,8 +528,8 @@ dGType<:Union{
             end
             # fill!(primal_sol_cpu, 0.0)
             # fill!(dual_sol_cpu, 0.0)
-            primal_sol_gpu .= 0.0
-            dual_sol_gpu .= 0.0
+            primal_sol .= 0.0
+            dual_sol .= 0.0
         else
             if verbose > 0
                 @info ("Warm start!!")
@@ -542,19 +542,19 @@ dGType<:Union{
         if verbose > 0
             @info ("Initializing primal and dual variables to random.")
         end
-        primal_sol_gpu = CuArray(rand(n))
-        dual_sol_gpu = CuArray(rand(m))
+        primal_sol = CuArray(rand(n))
+        dual_sol = CuArray(rand(m))
     end
     # make sure rescaling_method do not change initial data
-    @assert all(bl_gpu .<= bu_gpu) "Not all elements of bl are less than or equal to the corresponding elements in bu"
+    @assert all(bl .<= bu) "Not all elements of bl are less than or equal to the corresponding elements in bu"
     ## set data struct
     coeff = coeffUnion(
         G = nothing,
         h = nothing,
         m = m,
         n = n,
-        d_G = G_gpu,
-        d_h = h_gpu
+        d_G = G,
+        d_h = h
     )
     coeffTrans = coeffUnion(
         G = nothing,
@@ -567,7 +567,7 @@ dGType<:Union{
     x_soc_cone_indices_start, x_soc_cone_indices_end, x_rsoc_cone_indices_start, x_rsoc_cone_indices_end, x_exp_cone_indices_start, x_exp_cone_indices_end, x_dual_exp_cone_indices_start, x_dual_exp_cone_indices_end = 
     recover_soc_cone_rotated_exp_cone_indices(
         zero_indices = 0,
-        boxs_indices = length(bl_gpu),
+        boxs_indices = length(bl),
         q = soc_x,
         rq = rsoc_x,
         exp_q = exp_x,
@@ -583,7 +583,7 @@ dGType<:Union{
         dual_exp_q = dual_expG
     )
     Dl_struct = dualVector(
-        y = Dl_gpu,
+        y = Dl,
         m = m,
         mGzero = mGzero,
         mGnonnegative = mGnonnegative,
@@ -597,8 +597,8 @@ dGType<:Union{
         dual_exp_cone_indices_end = y_dual_exp_cone_indices_end
     )
     Dr_struct = primalVector(
-        x = Dr_gpu,
-        box_index = length(bl_gpu),
+        x = Dr,
+        box_index = length(bl),
         soc_cone_indices_start = x_soc_cone_indices_start,
         soc_cone_indices_end = x_soc_cone_indices_end,
         rsoc_cone_indices_start = x_rsoc_cone_indices_start,
@@ -620,13 +620,13 @@ dGType<:Union{
         m = m,
         n = n,
         nb = nb,
-        c_gpu = c_gpu,
+        c_gpu = c,
         coeff = coeff,
         coeffTrans = coeffTrans,
         GlambdaMax = 0.0, # initialize to zero
         GlambdaMax_flag = 0,
-        bl_gpu = bl_gpu,
-        bu_gpu = bu_gpu,
+        bl_gpu = bl,
+        bu_gpu = bu,
         diagonal_scale = diagonal_scale,
         raw_data = nothing
     )
@@ -635,10 +635,10 @@ dGType<:Union{
             m = m,
             n = n,
             nb = nb,
-            c_gpu = deepcopy(c_gpu),
+            c_gpu = deepcopy(c),
             coeff = coeff,
-            bl_gpu = deepcopy(bl_gpu),
-            bu_gpu = deepcopy(bu_gpu),
+            bl_gpu = deepcopy(bl),
+            bu_gpu = deepcopy(bu),
             hNrm1 = data.hNrm1,
             cNrm1 = data.cNrm1,
             hNrmInf = data.hNrmInf,
@@ -647,8 +647,8 @@ dGType<:Union{
         data.raw_data = raw_data
     end
     primal_sol_struct = primalVector(
-        x = deepcopy(primal_sol_gpu),
-        box_index = length(bl_gpu),
+        x = deepcopy(primal_sol),
+        box_index = length(bl),
         soc_cone_indices_start = x_soc_cone_indices_start,
         soc_cone_indices_end = x_soc_cone_indices_end,
         rsoc_cone_indices_start = x_rsoc_cone_indices_start,
@@ -659,8 +659,8 @@ dGType<:Union{
         dual_exp_cone_indices_end = x_dual_exp_cone_indices_end
     )
     primal_sol_lag_struct = primalVector(
-        x = deepcopy(primal_sol_gpu),
-        box_index = length(bl_gpu),
+        x = deepcopy(primal_sol),
+        box_index = length(bl),
         soc_cone_indices_start = x_soc_cone_indices_start,
         soc_cone_indices_end = x_soc_cone_indices_end,
         rsoc_cone_indices_start = x_rsoc_cone_indices_start,
@@ -671,8 +671,8 @@ dGType<:Union{
         dual_exp_cone_indices_end = x_dual_exp_cone_indices_end
     )
     primal_sol_mean_struct = primalVector(
-        x = deepcopy(primal_sol_gpu),
-        box_index = length(bl_gpu),
+        x = deepcopy(primal_sol),
+        box_index = length(bl),
         soc_cone_indices_start = x_soc_cone_indices_start,
         soc_cone_indices_end = x_soc_cone_indices_end,
         rsoc_cone_indices_start = x_rsoc_cone_indices_start,
@@ -690,7 +690,7 @@ dGType<:Union{
             primal_sol = primal_sol_struct,
             primal_sol_lag = primal_sol_lag_struct,
             primal_sol_mean = primal_sol_mean_struct,
-            box_index = length(bl_gpu),
+            box_index = length(bl),
             bl = data.d_bl,
             bu = data.d_bu,
             soc_cone_indices_start = x_soc_cone_indices_start,
@@ -713,7 +713,7 @@ dGType<:Union{
             primal_sol = primal_sol_struct,
             primal_sol_lag = primal_sol_lag_struct,
             primal_sol_mean = primal_sol_mean_struct,
-            box_index = length(bl_gpu),
+            box_index = length(bl),
             bl = data.d_bl,
             bu = data.d_bu,
             soc_cone_indices_start = x_soc_cone_indices_start,
@@ -732,7 +732,7 @@ dGType<:Union{
     end
     
     dual_sol_struct = dualVector(
-        y = deepcopy(dual_sol_gpu),
+        y = deepcopy(dual_sol),
         m = m,
         mGzero = mGzero,
         mGnonnegative = mGnonnegative,
@@ -746,7 +746,7 @@ dGType<:Union{
         dual_exp_cone_indices_end = y_dual_exp_cone_indices_end
     )
     dual_sol_lag_struct = dualVector(
-        y = deepcopy(dual_sol_gpu),
+        y = deepcopy(dual_sol),
         m = m,
         mGzero = mGzero,
         mGnonnegative = mGnonnegative,
@@ -760,7 +760,7 @@ dGType<:Union{
         dual_exp_cone_indices_end = y_dual_exp_cone_indices_end
     )
     dual_sol_mean_struct = dualVector(
-        y = deepcopy(dual_sol_gpu),
+        y = deepcopy(dual_sol),
         m = m,
         mGzero = mGzero,
         mGnonnegative = mGnonnegative,
@@ -792,7 +792,7 @@ dGType<:Union{
                 primal_sol = deepCopyPrimalVector(primal_sol_struct),
                 primal_sol_lag = deepCopyPrimalVector(primal_sol_lag_struct),
                 primal_sol_mean = deepCopyPrimalVector(primal_sol_mean_struct),
-                box_index = length(bl_gpu),
+                box_index = length(bl),
                 bl = data.d_bl,
                 bu = data.d_bu,
                 soc_cone_indices_start = x_soc_cone_indices_start,
@@ -853,7 +853,7 @@ dGType<:Union{
                 primal_sol = deepCopyPrimalVector(primal_sol_struct),
                 primal_sol_lag = deepCopyPrimalVector(primal_sol_lag_struct),
                 primal_sol_mean = deepCopyPrimalVector(primal_sol_mean_struct),
-                box_index = length(bl_cpu),
+                box_index = length(bl),
                 bl = data.d_bl,
                 bu = data.d_bu,
                 soc_cone_indices_start = x_soc_cone_indices_start,
@@ -1218,23 +1218,23 @@ function rpdhg_gpu_solve(;
     n::Integer,
     m::Integer,
     nb::Integer,
-    c_cpu::Vector{rpdhg_float},
-    G_cpu::AbstractMatrix{rpdhg_float},
-    h_cpu::hType,
+    c::Vector{rpdhg_float},
+    G::AbstractMatrix{rpdhg_float},
+    h::hType,
     mGzero::Integer, # m of Q for zero cone
     mGnonnegative::Integer, # m of Q for positive cone
     socG::Vector{<:Integer},
     rsocG::Vector{<:Integer},
     expG::Integer,
     dual_expG::Integer,
-    bl_cpu::Vector{rpdhg_float},
-    bu_cpu::Vector{rpdhg_float},
+    bl::Vector{rpdhg_float},
+    bu::Vector{rpdhg_float},
     soc_x::Vector{<:Integer},
     rsoc_x::Vector{<:Integer},
     exp_x::Integer = 0,
     dual_exp_x::Integer = 0,
-    Dl_cpu::Vector{rpdhg_float} = ones(m),
-    Dr_cpu::Vector{rpdhg_float} = ones(n),
+    Dl::Vector{rpdhg_float} = ones(m),
+    Dr::Vector{rpdhg_float} = ones(n),
     rescaling_method::Symbol = :ruiz_pock_chambolle,
     use_preconditioner::Bool = true,
     use_adaptive_restart::Bool = true,
@@ -1242,8 +1242,8 @@ function rpdhg_gpu_solve(;
     use_aggressive::Bool = true,
     use_accelerated::Bool = false,
     use_resolving::Bool = true,
-    primal_sol_cpu::Vector{rpdhg_float} = zeros(n),
-    dual_sol_cpu::Vector{rpdhg_float} = zeros(m),
+    primal_sol::Vector{rpdhg_float} = zeros(n),
+    dual_sol::Vector{rpdhg_float} = zeros(m),
     warm_start::Bool = false,
     max_outer_iter::Integer = 10000,
     max_inner_iter::Integer = 500000,
@@ -1312,7 +1312,7 @@ function rpdhg_gpu_solve(;
         @info ("---------------------------------------------------")
         @info ("variable number: $n")
         @info ("constraint number: $m")
-        @info ("non-zero elements in G: $(nnz(G_cpu))")
+        @info ("non-zero elements in G: $(nnz(G))")
         @info ("Number of box constraints: $nb")
         @info ("Number of equal constraints: $mGzero")
         @info ("Number of nonnegative constraints: $mGnonnegative")
@@ -1326,7 +1326,7 @@ function rpdhg_gpu_solve(;
         @info ("Number of dual exp cone variables: $dual_exp_x")
         @info ("---------------------------------------------------")
     end
-    if m != size(G_cpu, 1)
+    if m != size(G, 1)
         error("m does not match the size of G")
     end
     if m != mGzero + mGnonnegative + sum(socG) + sum(rsocG) + (expG + dual_expG) * 3
@@ -1346,14 +1346,14 @@ function rpdhg_gpu_solve(;
     end
 
     Random.seed!(1234)
-    if length(primal_sol_cpu) == n && length(dual_sol_cpu) == m
+    if length(primal_sol) == n && length(dual_sol) == m
         if !warm_start
             if verbose > 0
                 @info ("Warm start not enabled. Ignoring warm start values.")
                 @info ("Initializing primal and dual variables to zero.")
             end
-            fill!(primal_sol_cpu, 0.0)
-            fill!(dual_sol_cpu, 0.0)
+            fill!(primal_sol, 0.0)
+            fill!(dual_sol, 0.0)
         else
             if verbose > 0
                 @info ("Warm start!!")
@@ -1366,15 +1366,15 @@ function rpdhg_gpu_solve(;
         if verbose > 0
             @info ("Initializing primal and dual variables to random.")
         end
-        primal_sol_cpu = rand(n)
-        dual_sol_cpu = rand(m)
+        primal_sol = rand(n)
+        dual_sol = rand(m)
     end
     # make sure rescaling_method do not change initial data
-    @assert all(bl_cpu .<= bu_cpu) "Not all elements of bl are less than or equal to the corresponding elements in bu"
+    @assert all(bl .<= bu) "Not all elements of bl are less than or equal to the corresponding elements in bu"
     ## set data struct
     coeff = coeffUnion(
-        G = G_cpu,
-        h = h_cpu,
+        G = G,
+        h = h,
         m = m,
         n = n,
         d_G = nothing,
@@ -1391,7 +1391,7 @@ function rpdhg_gpu_solve(;
     x_soc_cone_indices_start, x_soc_cone_indices_end, x_rsoc_cone_indices_start, x_rsoc_cone_indices_end, x_exp_cone_indices_start, x_exp_cone_indices_end, x_dual_exp_cone_indices_start, x_dual_exp_cone_indices_end = 
     recover_soc_cone_rotated_exp_cone_indices(
         zero_indices = 0,
-        boxs_indices = length(bl_cpu),
+        boxs_indices = length(bl),
         q = soc_x,
         rq = rsoc_x,
         exp_q = exp_x,
@@ -1407,7 +1407,7 @@ function rpdhg_gpu_solve(;
         dual_exp_q = dual_expG
     )
     Dl_struct = dualVector(
-        y = CuArray(Dl_cpu),
+        y = CuArray(Dl),
         m = m,
         mGzero = mGzero,
         mGnonnegative = mGnonnegative,
@@ -1421,8 +1421,8 @@ function rpdhg_gpu_solve(;
         dual_exp_cone_indices_end = y_dual_exp_cone_indices_end
     )
     Dr_struct = primalVector(
-        x = CuArray(Dr_cpu),
-        box_index = length(bl_cpu),
+        x = CuArray(Dr),
+        box_index = length(bl),
         soc_cone_indices_start = x_soc_cone_indices_start,
         soc_cone_indices_end = x_soc_cone_indices_end,
         rsoc_cone_indices_start = x_rsoc_cone_indices_start,
@@ -1444,13 +1444,13 @@ function rpdhg_gpu_solve(;
         m = m,
         n = n,
         nb = nb,
-        c_cpu = c_cpu,
+        c_cpu = c,
         coeff = coeff,
         coeffTrans = coeffTrans,
         GlambdaMax = 0.0, # initialize to zero
         GlambdaMax_flag = 0,
-        bl_cpu = bl_cpu,
-        bu_cpu = bu_cpu,
+        bl_cpu = bl,
+        bu_cpu = bu,
         diagonal_scale = diagonal_scale,
         raw_data = nothing
     )
@@ -1459,10 +1459,10 @@ function rpdhg_gpu_solve(;
             m = m,
             n = n,
             nb = nb,
-            c_cpu = c_cpu,
+            c_cpu = c,
             coeff = coeff,
-            bl_cpu = bl_cpu,
-            bu_cpu = bu_cpu,
+            bl_cpu = bl,
+            bu_cpu = bu,
             hNrm1 = data.hNrm1,
             cNrm1 = data.cNrm1,
             hNrmInf = data.hNrmInf,
@@ -1471,8 +1471,8 @@ function rpdhg_gpu_solve(;
         data.raw_data = raw_data
     end
     primal_sol_struct = primalVector(
-        x = CuArray(primal_sol_cpu),
-        box_index = length(bl_cpu),
+        x = CuArray(primal_sol),
+        box_index = length(bl),
         soc_cone_indices_start = x_soc_cone_indices_start,
         soc_cone_indices_end = x_soc_cone_indices_end,
         rsoc_cone_indices_start = x_rsoc_cone_indices_start,
@@ -1483,8 +1483,8 @@ function rpdhg_gpu_solve(;
         dual_exp_cone_indices_end = x_dual_exp_cone_indices_end
     )
     primal_sol_lag_struct = primalVector(
-        x = CuArray(primal_sol_cpu),
-        box_index = length(bl_cpu),
+        x = CuArray(primal_sol),
+        box_index = length(bl),
         soc_cone_indices_start = x_soc_cone_indices_start,
         soc_cone_indices_end = x_soc_cone_indices_end,
         rsoc_cone_indices_start = x_rsoc_cone_indices_start,
@@ -1495,8 +1495,8 @@ function rpdhg_gpu_solve(;
         dual_exp_cone_indices_end = x_dual_exp_cone_indices_end
     )
     primal_sol_mean_struct = primalVector(
-        x = CuArray(primal_sol_cpu),
-        box_index = length(bl_cpu),
+        x = CuArray(primal_sol),
+        box_index = length(bl),
         soc_cone_indices_start = x_soc_cone_indices_start,
         soc_cone_indices_end = x_soc_cone_indices_end,
         rsoc_cone_indices_start = x_rsoc_cone_indices_start,
@@ -1514,7 +1514,7 @@ function rpdhg_gpu_solve(;
             primal_sol = primal_sol_struct,
             primal_sol_lag = primal_sol_lag_struct,
             primal_sol_mean = primal_sol_mean_struct,
-            box_index = length(bl_cpu),
+            box_index = length(bl),
             bl = data.d_bl,
             bu = data.d_bu,
             soc_cone_indices_start = x_soc_cone_indices_start,
@@ -1537,7 +1537,7 @@ function rpdhg_gpu_solve(;
             primal_sol = primal_sol_struct,
             primal_sol_lag = primal_sol_lag_struct,
             primal_sol_mean = primal_sol_mean_struct,
-            box_index = length(bl_cpu),
+            box_index = length(bl),
             bl = data.d_bl,
             bu = data.d_bu,
             soc_cone_indices_start = x_soc_cone_indices_start,
@@ -1556,7 +1556,7 @@ function rpdhg_gpu_solve(;
     end
     
     dual_sol_struct = dualVector(
-        y = CuArray(dual_sol_cpu),
+        y = CuArray(dual_sol),
         m = m,
         mGzero = mGzero,
         mGnonnegative = mGnonnegative,
@@ -1570,7 +1570,7 @@ function rpdhg_gpu_solve(;
         dual_exp_cone_indices_end = y_dual_exp_cone_indices_end
     )
     dual_sol_lag_struct = dualVector(
-        y = CuArray(dual_sol_cpu),
+        y = CuArray(dual_sol),
         m = m,
         mGzero = mGzero,
         mGnonnegative = mGnonnegative,
@@ -1584,7 +1584,7 @@ function rpdhg_gpu_solve(;
         dual_exp_cone_indices_end = y_dual_exp_cone_indices_end
     )
     dual_sol_mean_struct = dualVector(
-        y = CuArray(dual_sol_cpu),
+        y = CuArray(dual_sol),
         m = m,
         mGzero = mGzero,
         mGnonnegative = mGnonnegative,
@@ -1616,7 +1616,7 @@ function rpdhg_gpu_solve(;
                 primal_sol = deepCopyPrimalVector(primal_sol_struct),
                 primal_sol_lag = deepCopyPrimalVector(primal_sol_lag_struct),
                 primal_sol_mean = deepCopyPrimalVector(primal_sol_mean_struct),
-                box_index = length(bl_cpu),
+                box_index = length(bl),
                 bl = data.d_bl,
                 bu = data.d_bu,
                 soc_cone_indices_start = x_soc_cone_indices_start,
@@ -1677,7 +1677,7 @@ function rpdhg_gpu_solve(;
                 primal_sol = deepCopyPrimalVector(primal_sol_struct),
                 primal_sol_lag = deepCopyPrimalVector(primal_sol_lag_struct),
                 primal_sol_mean = deepCopyPrimalVector(primal_sol_mean_struct),
-                box_index = length(bl_cpu),
+                box_index = length(bl),
                 bl = data.d_bl,
                 bu = data.d_bu,
                 soc_cone_indices_start = x_soc_cone_indices_start,
@@ -1956,3 +1956,91 @@ function rpdhg_gpu_solve(;
     CUDA.reclaim()
     return solver.sol
 end # end rpdhg_cpu_solve
+
+function solve_with_solver(solver::PDCS_GPU_Solver)
+    if isa(solver.c, CuArray)
+        rpdhg_gpu_solve_input_gpu_data(
+            n = solver.n,
+            m = solver.m,
+            nb = solver.nb,
+            c = solver.c,
+            G = solver.G,
+            h = solver.h,
+            mGzero = solver.mGzero,
+            mGnonnegative = solver.mGnonnegative,
+            socG = solver.socG,
+            rsocG = solver.rsocG,
+            expG = solver.expG,
+            dual_expG = solver.dual_expG,
+            bl = solver.bl,
+            bu = solver.bu,
+            soc_x = solver.soc_x,
+            rsoc_x = solver.rsoc_x,
+            exp_x = solver.exp_x,
+            dual_exp_x = solver.dual_exp_x,
+            Dl = solver.Dl,
+            rescaling_method = solver.rescaling_method,
+            use_preconditioner = solver.use_preconditioner,
+            use_adaptive_restart = solver.use_adaptive_restart,
+            use_adaptive_step_size_weight = solver.use_adaptive_step_size_weight,
+            use_aggressive = solver.use_aggressive,
+            use_accelerated = solver.use_accelerated,
+            use_resolving = solver.use_resolving,
+            primal_sol = solver.primal_sol,
+            dual_sol = solver.dual_sol,
+            warm_start = solver.warm_start,
+            max_outer_iter = solver.max_outer_iter,
+            max_inner_iter = solver.max_inner_iter,
+            abs_tol = solver.abs_tol,
+            rel_tol = solver.rel_tol,
+            logfile_name = solver.logfile_name,
+            use_kkt_restart = solver.use_kkt_restart,
+            kkt_restart_freq = solver.kkt_restart_freq,
+            use_duality_gap_restart = solver.use_duality_gap_restart,
+            duality_gap_restart_freq = solver.duality_gap_restart_freq
+        )
+    else
+        rpdhg_gpu_solve(
+            n = solver.n,
+            m = solver.m,
+            nb = solver.nb,
+            c = solver.c,
+            G = solver.G,
+            h = solver.h,
+            mGzero = solver.mGzero,
+            mGnonnegative = solver.mGnonnegative,
+            socG = solver.socG,
+            rsocG = solver.rsocG,
+            expG = solver.expG,
+            dual_expG = solver.dual_expG,
+            bl = solver.bl,
+            bu = solver.bu,
+            soc_x = solver.soc_x,
+            rsoc_x = solver.rsoc_x,
+            exp_x = solver.exp_x,
+            dual_exp_x = solver.dual_exp_x,
+            Dl = solver.Dl,
+            rescaling_method = solver.rescaling_method,
+            use_preconditioner = solver.use_preconditioner,
+            use_adaptive_restart = solver.use_adaptive_restart,
+            use_adaptive_step_size_weight = solver.use_adaptive_step_size_weight,
+            use_aggressive = solver.use_aggressive,
+            use_accelerated = solver.use_accelerated,
+            use_resolving = solver.use_resolving,
+            primal_sol = solver.primal_sol,
+            dual_sol = solver.dual_sol,
+            warm_start = solver.warm_start,
+            max_outer_iter = solver.max_outer_iter,
+            max_inner_iter = solver.max_inner_iter,
+            abs_tol = solver.abs_tol,
+            rel_tol = solver.rel_tol,
+            logfile_name = solver.logfile_name,
+            use_kkt_restart = solver.use_kkt_restart,
+            kkt_restart_freq = solver.kkt_restart_freq,
+            use_duality_gap_restart = solver.use_duality_gap_restart,
+            duality_gap_restart_freq = solver.duality_gap_restart_freq
+        )
+    end
+
+
+end

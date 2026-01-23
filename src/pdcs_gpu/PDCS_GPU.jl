@@ -8,7 +8,8 @@ using Base.Threads
 using JuMP
 using Polynomials
 using Statistics
-using CUDA
+using CUDA, PythonCall
+using CUDA.CUSPARSE
 using Libdl
 using Logging
 using Dates
@@ -86,6 +87,7 @@ include("./rpdhg_alg_gpu_gen.jl")
 
 include("./utils.jl")
 include("./MOI_wrapper/MOI_wrapper.jl")
+include("./cvxpy_wrapper/py2jl.jl")
 
 export rpdhg_gpu_solve;
 
