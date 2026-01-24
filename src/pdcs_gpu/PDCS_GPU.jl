@@ -88,6 +88,7 @@ include("./rpdhg_alg_gpu_gen.jl")
 include("./utils.jl")
 include("./MOI_wrapper/MOI_wrapper.jl")
 include("./cvxpy_wrapper/py2jl.jl")
+include("./cvxpy_wrapper/data_updating.jl")
 
 export rpdhg_gpu_solve;
 
