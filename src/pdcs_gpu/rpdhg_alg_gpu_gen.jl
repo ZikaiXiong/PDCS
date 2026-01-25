@@ -813,7 +813,7 @@ dGType<:Union{
             proj_diagonal! = x -> println("proj_diagonal! not implemented"),
             recovered_dual = solVecDualRecovered(deepCopyDualVector(dual_sol_struct), deepCopyDualVector(dual_sol_struct))
         )
-        println("norm(y.dual_sol.y, Inf): $(CUDA.norm(y.dual_sol.y, Inf))")
+        # println("norm(y.dual_sol.y, Inf): $(CUDA.norm(y.dual_sol.y, Inf))")
         dual_sol_temp = solVecDual(
             dual_sol = deepCopyDualVector(dual_sol_struct),
             dual_sol_lag = deepCopyDualVector(dual_sol_lag_struct),
@@ -976,8 +976,6 @@ dGType<:Union{
         else
             throw(ArgumentError("The rescaling method is not defined, two choices: :ruiz, :pock_chambolle, :ruiz_pock_chambolle"))
         end
-        println("scale_preconditioner")
-        println("before scale_preconditioner norm(y.dual_sol.y, Inf): $(CUDA.norm(solver.sol.y.dual_sol.y, Inf))")
         scale_preconditioner!(
             Dr_product = solver.data.diagonal_scale.Dr_product.x,
             Dl_product = solver.data.diagonal_scale.Dl_product.y,
@@ -1025,7 +1023,6 @@ dGType<:Union{
     push!(sol.info.infeaInfo, PDHGCLPInfeaInfo()) # infeasibility info for one sequence
     push!(sol.info.infeaInfo, PDHGCLPInfeaInfo()) # infeasibility info for the other sequence
     if use_preconditioner
-        println("before recover_solution norm(y.dual_sol.y, Inf): $(CUDA.norm(solver.sol.y.dual_sol.y, Inf))")
         recover_solution!(
             data = solver.data,
             Dr_product = solver.data.diagonal_scale.Dr_product.x,
@@ -1848,7 +1845,6 @@ function rpdhg_gpu_solve(;
     push!(sol.info.infeaInfo, PDHGCLPInfeaInfo()) # infeasibility info for one sequence
     push!(sol.info.infeaInfo, PDHGCLPInfeaInfo()) # infeasibility info for the other sequence
     if use_preconditioner
-        println("before recover_solution norm(y.dual_sol.y, Inf): $(CUDA.norm(solver.sol.y.dual_sol.y, Inf))")
         recover_solution!(
             data = solver.data,
             Dr_product = solver.data.diagonal_scale.Dr_product.x,
@@ -1928,11 +1924,11 @@ function rpdhg_gpu_solve(;
         printInfo(infoAll = sol.info);
     end
     if verbose > 0
-        CUDA.memory_status()
+        @info CUDA.memory_status()
     end
     main_loop!(solver = solver)
     if verbose > 0
-        CUDA.memory_status()
+        @info CUDA.memory_status()
     end
     destroy_cublas_handle(handle)
     @info ("===============================================")

@@ -373,7 +373,7 @@ function rescale_problem!(;
         )
     end
 
-    println("complete ruiz_rescaling!")
+    @info("complete ruiz_rescaling!")
 
     if !isnothing(pock_chambolle_alpha)
         pock_chambolle_rescaling!(
@@ -386,7 +386,7 @@ function rescale_problem!(;
             constraint_rescaling_G = constraint_rescaling_G
         )
     end
-    println("complete pock_chambolle_rescaling!")
+    @info("complete pock_chambolle_rescaling!")
     CUDA.unsafe_free!(row_idx)
 end
 

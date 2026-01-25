@@ -909,7 +909,7 @@ mutable struct rpdhgRawData{
         }
         bl_finite = deepcopy(bl)
         bu_finite = deepcopy(bu)
-        println("consider bl_finite: ")
+        # println("consider bl_finite: ")
         n = length(bl)
         if n > 0
             # CUDA.@allowscalar bl_finite = replace(bl_finite, -Inf=>0.0)
