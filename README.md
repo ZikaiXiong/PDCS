@@ -28,6 +28,11 @@ cd src/pdcs_gpu/cuda
 make # compile the cuda code, default ARCH = sm_90, if necessary please modify makefile
 cd ../../..
 ```
+- Install `PDCS` package in Julia
+```julia
+using Pkg
+Pkg.develop(path="PDCS/src") # It will run a small demo for precompiling, but the verbose log only occur once
+```
 
 
 ### Usage
@@ -36,11 +41,11 @@ cd ../../..
 julia ./test/env.jl # install the dependencies
 julia ./test/test_exp.jl # test the exponential cone cpu
 julia ./test/test_soc.jl # test the second-order cone cpu
-julia ./test/test_rsoc.jl # test the rotated second-order cone cpu
+# julia ./test/test_rsoc.jl # test the rotated second-order cone cpu, delete in new version
 
 julia ./test/test_exp_gpu.jl # test the exponential cone gpu
 julia ./test/test_soc_gpu.jl # test the second-order cone gpu
-julia ./test/test_rsoc_gpu.jl # test the rotated second-order cone gpu
+# julia ./test/test_rsoc_gpu.jl # test the rotated second-order cone gpu, delete in new version
 ```
 
 
