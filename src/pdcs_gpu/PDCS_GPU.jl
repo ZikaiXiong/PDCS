@@ -1,3 +1,4 @@
+__precompile__()
 module PDCS_GPU
 
 using Random, SparseArrays, LinearAlgebra
@@ -15,6 +16,7 @@ using Logging
 using Dates
 import Base: unsafe_convert
 using Base.Threads: SpinLock
+using SnoopPrecompile
 
 # Logging.with_logger(Logging.NullLogger()) do
 #     CUDA.allowscalar(true)
@@ -109,6 +111,21 @@ include("./utils.jl")
 include("./MOI_wrapper/MOI_wrapper.jl")
 include("./cvxpy_wrapper/py2jl.jl")
 include("./cvxpy_wrapper/data_updating.jl")
+
+include("./precompile.jl")
+redirect_stdout(devnull) do; 
+    SnoopPrecompile.@precompile_all_calls begin
+        if CUDA.has_cuda()
+            __init__()
+            @info "============precompile PDCS_GPU============"
+            __precompile_gpu()
+            __precompile_gpu_clean_pointer()
+            @info "============precompile PDCS_GPU done============"
+        else
+            @info "============ PDCS_GPU need cuda to precompile ============"
+        end
+    end
+end
 
 export rpdhg_gpu_solve;
 

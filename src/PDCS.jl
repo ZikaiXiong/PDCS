@@ -13,6 +13,8 @@ using PDCS.PDCS_GPU  # or PDCS.PDCS_CPU
 # Use PDCS_GPU or PDCS_CPU modules as before
 ```
 """
+
+__precompile__()
 module PDCS
 
 # Load submodules - they will be available as PDCS.PDCS_GPU and PDCS.PDCS_CPU
