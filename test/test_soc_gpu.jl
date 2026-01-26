@@ -1,9 +1,6 @@
 using Pkg
 Pkg.activate("pdcs_env")
-include("../src/pdcs_gpu/PDCS_GPU.jl")
-include("../src/pdcs_cpu/PDCS_CPU.jl")
-using .PDCS_GPU
-using .PDCS_CPU
+using PDCS: PDCS_GPU, PDCS_CPU
 using LinearAlgebra
 using JuMP
 using Random, SparseArrays
@@ -49,17 +46,17 @@ sol_res = PDCS_GPU.rpdhg_gpu_solve(
     n = n,
     m = m,
     nb = n,
-    c_cpu = c,
-    G_cpu = A,
-    h_cpu = b,
+    c = c,
+    G = A,
+    h = b,
     mGzero = m_zero,
     mGnonnegative = m_nonnegative,
     socG = Vector{Integer}([m - m_zero - m_nonnegative]),
     rsocG = Vector{Integer}([]),
     expG = 0,
     dual_expG = 0,
-    bl_cpu = zeros(n),
-    bu_cpu = ones(n) * Inf,
+    bl = zeros(n),
+    bu = ones(n) * Inf,
     soc_x = Vector{Integer}([]),
     rsoc_x = Vector{Integer}([]),
     exp_x = 0,
@@ -75,17 +72,17 @@ sol_res = PDCS_GPU.rpdhg_gpu_solve_input_gpu_data(
     n = n,
     m = m,
     nb = n,
-    c_gpu = CuArray(c),
-    G_gpu = G_gpu,
-    h_gpu = CuArray(b),
+    c = CuArray(c),
+    G = G_gpu,
+    h = CuArray(b),
     mGzero = m_zero,
     mGnonnegative = m_nonnegative,
     socG = Vector{Integer}([m - m_zero - m_nonnegative]),
     rsocG = Vector{Integer}([]),
     expG = 0,
     dual_expG = 0,
-    bl_gpu = CuArray(zeros(n)),
-    bu_gpu = CuArray(ones(n) * Inf),
+    bl = CuArray(zeros(n)),
+    bu = CuArray(ones(n) * Inf),
     soc_x = Vector{Integer}([]),
     rsoc_x = Vector{Integer}([]),
     exp_x = 0,

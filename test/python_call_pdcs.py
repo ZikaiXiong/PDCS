@@ -6,13 +6,12 @@ import cupy as cp
 from cupyx.scipy.sparse import csr_matrix
 
 jl.seval('using Pkg')
-jl.seval("Pkg.activate(\"./pdcs_env\")")
+# jl.seval("Pkg.activate(\"./PDCS_fork/test/pdcs_env\")")
 # jl.seval('Pkg.add("PythonCall")')
 # jl.seval('using PythonCall')
 jl.seval('using LinearAlgebra, SparseArrays')
 jl.seval('using CUDA, CUDA.CUSPARSE, SparseMatricesCSR')
-jl.seval('include("./PDCS_fork/src/pdcs_gpu/PDCS_GPU.jl")')
-jl.seval('include("./PDCS_fork/src/pdcs_cpu/PDCS_CPU.jl")')
+jl.seval('using PDCS: PDCS_GPU, PDCS_CPU')
 
 basedim = 100
 n = 2 * basedim

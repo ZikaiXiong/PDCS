@@ -1,9 +1,6 @@
 using Pkg
 Pkg.activate("pdcs_env")
-include("../src/pdcs_gpu/PDCS_GPU.jl")
-include("../src/pdcs_cpu/PDCS_CPU.jl")
-using .PDCS_GPU
-using .PDCS_CPU
+using PDCS: PDCS_GPU, PDCS_CPU
 using LinearAlgebra
 using JuMP
 using Random, SparseArrays
