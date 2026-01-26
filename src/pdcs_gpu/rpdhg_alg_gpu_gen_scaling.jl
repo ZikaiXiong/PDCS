@@ -430,7 +430,7 @@ function restart_condition_check_diagonal!(; sol::Solution, solver::rpdhgSolver,
             else    
                 sol.info.restart_trigger_mean = sol.info.restart_trigger_mean + 1
             end
-            println("restart due to condition 1")
+            @info "restart due to condition 1"
             return true
         end # end if rhoVal_left
         # condition 2
@@ -443,7 +443,7 @@ function restart_condition_check_diagonal!(; sol::Solution, solver::rpdhgSolver,
             else
                 sol.info.restart_trigger_mean = sol.info.restart_trigger_mean + 1
             end
-            println("restart due to condition 2")
+            @info "restart due to condition 2"
             return true
         end # end if rhoVal_left
     else
@@ -478,7 +478,7 @@ function restart_condition_check_diagonal!(; sol::Solution, solver::rpdhgSolver,
             else    
                 sol.info.restart_trigger_mean = sol.info.restart_trigger_mean + 1
             end
-            println("restart due to condition 1 kkt")
+            @info "restart due to condition 1 kkt"
             return true
         end # end if rhoVal_left
         # condition 2
@@ -492,7 +492,7 @@ function restart_condition_check_diagonal!(; sol::Solution, solver::rpdhgSolver,
             else
                 sol.info.restart_trigger_mean = sol.info.restart_trigger_mean + 1
             end
-            println("restart due to condition 2 kkt")
+            @info "restart due to condition 2 kkt"
             return true
         end # end if rhoVal_left
     end

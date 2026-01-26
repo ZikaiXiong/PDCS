@@ -1858,10 +1858,10 @@ function rpdhg_gpu_solve(;
                                             slack = sol.y.slack,
                                             dual_sol_temp = sol.y,
                                             converge_info = sol.info.convergeInfo[1])
-        println("norm(sol.x.recovered_primal.primal_sol.x, Inf): $(CUDA.norm(sol.x.recovered_primal.primal_sol.x, Inf))")
-        println("norm(sol.y.recovered_dual.dual_sol.y, Inf): $(CUDA.norm(sol.y.recovered_dual.dual_sol.y, Inf))")
-        println("norm(sol.x.primal_sol.x, Inf): $(CUDA.norm(sol.x.primal_sol.x, Inf))")
-        println("norm(sol.y.dual_sol.y, Inf): $(CUDA.norm(sol.y.dual_sol.y, Inf))")
+        # println("norm(sol.x.recovered_primal.primal_sol.x, Inf): $(CUDA.norm(sol.x.recovered_primal.primal_sol.x, Inf))")
+        # println("norm(sol.y.recovered_dual.dual_sol.y, Inf): $(CUDA.norm(sol.y.recovered_dual.dual_sol.y, Inf))")
+        # println("norm(sol.x.primal_sol.x, Inf): $(CUDA.norm(sol.x.primal_sol.x, Inf))")
+        # println("norm(sol.y.dual_sol.y, Inf): $(CUDA.norm(sol.y.dual_sol.y, Inf))")
         printInfo(infoAll = sol.info);
     else
         converge_info_calculation(solver = solver,
@@ -1923,13 +1923,13 @@ function rpdhg_gpu_solve(;
     if verbose > 0
         printInfo(infoAll = sol.info);
     end
-    if verbose > 0
-        @info CUDA.memory_status()
-    end
+    # if verbose > 0
+    #     @info CUDA.memory_status()
+    # end
     main_loop!(solver = solver)
-    if verbose > 0
-        @info CUDA.memory_status()
-    end
+    # if verbose > 0
+    #     @info CUDA.memory_status()
+    # end
     destroy_cublas_handle(handle)
     @info ("===============================================")
     infoSummary(info = sol.info)

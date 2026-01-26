@@ -35,8 +35,9 @@ end
 
 
 function massive_block_proj(vec::T, bl::T, bu::T, D_scaled::T, D_scaled_squared::T, D_scaled_mul_x::T, temp::T, t_warm_start::T, gpu_head_start::CUDA.CuArray{Int64, 1, CUDA.DeviceMemory}, gpu_ns::CUDA.CuArray{Int64, 1, CUDA.DeviceMemory}, blkNum::Int64, proj_type::CUDA.CuArray{Int64, 1, CUDA.DeviceMemory}, abs_tol::Float64 = 1e-12, rel_tol::Float64 = 1e-12) where T<:CuArray
-    nBlock = Int64(ceil((blkNum + ThreadPerBlock- 1) / ThreadPerBlock))
-    nBlock = min(nBlock, 10240)
+    # nBlock = Int64(ceil((blkNum + ThreadPerBlock- 1) / ThreadPerBlock))
+    # nBlock = min(nBlock, 10240)
+    nBlock = cld(blkNum + ThreadPerBlock, ThreadPerBlock)
     CUDA.@sync begin
         CUDA.cudacall(
         get_massive_block_proj_kernel(),
@@ -129,7 +130,8 @@ function get_sufficient_block_proj_kernel()::CuFunction
 end
 
 function sufficient_block_proj(vec::T, bl::T, bu::T, D_scaled::T, D_scaled_squared::T, D_scaled_mul_x::T, temp::T, t_warm_start::T, gpu_head_start::CUDA.CuArray{Int64, 1, CUDA.DeviceMemory}, gpu_ns::CUDA.CuArray{Int64, 1, CUDA.DeviceMemory}, blkNum::Int64, proj_type::CUDA.CuArray{Int64, 1, CUDA.DeviceMemory}, abs_tol::Float64 = 1e-12, rel_tol::Float64 = 1e-12) where T<:CuArray
-    nBlock = Int64(ceil((blkNum + 1) * 32 / ThreadPerBlock))
+    # nBlock = Int64(ceil((blkNum + 1) * 32 / ThreadPerBlock))
+    nBlock = cld((blkNum + 1) * 32, ThreadPerBlock)
     CUDA.@sync begin
         CUDA.cudacall(
         get_sufficient_block_proj_kernel(),
@@ -181,8 +183,9 @@ end
 
 
 function few_block_proj(vec::T, bl::T, bu::T, D_scaled::T, D_scaled_squared::T, D_scaled_mul_x::T, temp::T, t_warm_start::T, cpu_head_start::Vector{Int64}, gpu_ns::CUDA.CuArray{Int64, 1, CUDA.DeviceMemory}, cpu_ns::Vector{Int64}, blkNum::Int64, cpu_proj_type::Vector{Int64}, abs_tol::Float64 = 1e-12, rel_tol::Float64 = 1e-12) where T<:CuArray
-    nBlock = Int64(ceil((maximum(cpu_ns) + ThreadPerBlock + 1) / ThreadPerBlock))
+    # nBlock = Int64(ceil((maximum(cpu_ns) + ThreadPerBlock + 1) / ThreadPerBlock))
     nThread = Int64(ThreadPerBlock)
+    nBlock = cld(maximum(cpu_ns) + ThreadPerBlock + 1, ThreadPerBlock)
     fptr = few_block_proj_ptr[]
     fptr != C_NULL || error("few_block_proj not initialized. Did __init__() run?")
     @ccall $fptr(handle.handle::Ptr{Nothing},
@@ -247,7 +250,8 @@ function get_reflection_update_kernel()::CuFunction
 end
 
 function reflection_update(primal_sol::T, primal_sol_lag::T, primal_sol_mean::T, dual_sol::T, dual_sol_lag::T, dual_sol_mean::T, extra_coeff::Float64, primal_n::Int64, dual_n::Int64, inner_iter::Int64, eta_cum::Float64, eta::Float64) where T<:CuArray
-    nBlock = Int64(ceil((max(primal_n, dual_n) + ThreadPerBlock - 1) / ThreadPerBlock))
+    # nBlock = Int64(ceil((max(primal_n, dual_n) + ThreadPerBlock - 1) / ThreadPerBlock))
+    nBlock = cld(max(primal_n, dual_n) + ThreadPerBlock - 1, ThreadPerBlock)
     CUDA.@sync begin
         CUDA.cudacall(get_reflection_update_kernel(), 
         (CuPtr{Float64}, CuPtr{Float64}, CuPtr{Float64}, CuPtr{Float64}, CuPtr{Float64}, CuPtr{Float64}, Float64, Int64, Int64, Int64, Float64, Float64), 
@@ -293,7 +297,8 @@ function get_primal_update_kernel()::CuFunction
 end
 
 function primal_update(primal_sol::T, primal_sol_lag::T, primal_sol_diff::T, d_c::T, tau::Float64, n::Int64) where T<:CuArray
-    nBlock = Int64(ceil((n + ThreadPerBlock - 1) / ThreadPerBlock))
+    # nBlock = Int64(ceil((n + ThreadPerBlock - 1) / ThreadPerBlock))
+    nBlock = cld(n + ThreadPerBlock - 1, ThreadPerBlock)
     CUDA.@sync begin
         CUDA.cudacall(get_primal_update_kernel(), 
         (CuPtr{Float64}, CuPtr{Float64}, CuPtr{Float64}, CuPtr{Float64}, Float64, Int64), 
@@ -340,7 +345,8 @@ end
 
 
 function dual_update(dual_sol::T, dual_sol_lag::T, dual_sol_diff::T, d_h::T, sigma::Float64, n::Int64) where T<:CuArray
-    nBlock = Int64(ceil((n + ThreadPerBlock - 1) / ThreadPerBlock))
+    # nBlock = Int64(ceil((n + ThreadPerBlock - 1) / ThreadPerBlock))
+    nBlock = cld(n + ThreadPerBlock - 1, ThreadPerBlock)
     CUDA.@sync begin
         CUDA.cudacall(get_dual_update_kernel(), 
         (CuPtr{Float64}, CuPtr{Float64}, CuPtr{Float64}, CuPtr{Float64}, Float64, Int64), 
@@ -385,7 +391,8 @@ function get_extrapolation_update_kernel()::CuFunction
 end
 
 function extrapolation_update(primal_sol_diff::T, primal_sol::T, primal_sol_lag::T, n::Int64) where T<:CuArray
-    nBlock = Int64(ceil((n + ThreadPerBlock - 1) / ThreadPerBlock))
+    # nBlock = Int64(ceil((n + ThreadPerBlock - 1) / ThreadPerBlock))
+    nBlock = cld(n + ThreadPerBlock - 1, ThreadPerBlock)
     CUDA.@sync begin
         CUDA.cudacall(get_extrapolation_update_kernel(), 
         (CuPtr{Float64}, CuPtr{Float64}, CuPtr{Float64}, Int64), 
@@ -432,7 +439,8 @@ end
 
 
 function calculate_diff(dual_sol::T, dual_sol_lag::T, dual_sol_diff::T, dual_n::Int64, primal_sol::T, primal_sol_lag::T, primal_sol_diff::T,  primal_n::Int64) where T<:CuArray
-    nBlock = Int64(ceil((max(dual_n, primal_n) + ThreadPerBlock - 1) / ThreadPerBlock))
+    # nBlock = Int64(ceil((max(dual_n, primal_n) + ThreadPerBlock - 1) / ThreadPerBlock))
+    nBlock = cld(max(dual_n, primal_n) + ThreadPerBlock - 1, ThreadPerBlock)
     CUDA.@sync begin
         CUDA.cudacall(get_calculate_diff_kernel(), 
         (CuPtr{Float64}, CuPtr{Float64}, CuPtr{Float64}, Int64, CuPtr{Float64}, CuPtr{Float64}, CuPtr{Float64}, Int64), 
@@ -478,7 +486,8 @@ end
 
 
 function axpyz(z::T, alpha::Float64, y::T, x::T, n::Int64) where T<:CuArray
-    nBlock = Int64(ceil((n + ThreadPerBlock - 1) / ThreadPerBlock))
+    # nBlock = Int64(ceil((n + ThreadPerBlock - 1) / ThreadPerBlock))
+    nBlock = cld(n + ThreadPerBlock - 1, ThreadPerBlock)
     # z .= alpha * y .+ x
     CUDA.@sync begin
         CUDA.cudacall(get_axpyz_kernel(), 
@@ -525,7 +534,8 @@ end
 
 
 function average_seq(; primal_sol_mean::T, primal_sol::T, primal_n::Int64, dual_sol_mean::T, dual_sol::T, dual_n::Int64, inner_iter::Int64) where T<:CuArray
-    nBlock = Int64(ceil((max(primal_n, dual_n) + ThreadPerBlock - 1) / ThreadPerBlock))
+    # nBlock = Int64(ceil((max(primal_n, dual_n) + ThreadPerBlock - 1) / ThreadPerBlock))
+    nBlock = cld(max(primal_n, dual_n) + ThreadPerBlock - 1, ThreadPerBlock)
     CUDA.@sync begin
         CUDA.cudacall(get_average_seq_kernel(), 
         (CuPtr{Float64}, CuPtr{Float64}, Int64, CuPtr{Float64}, CuPtr{Float64}, Int64, Int64), 
@@ -569,7 +579,8 @@ function get_rescale_csr_kernel()::CuFunction
 end
 
 function rescale_csr(d_G::CUDA.CUSPARSE.CuSparseMatrixCSR, row_scaling::CuArray, col_scaling::CuArray, m::Int64, n::Int64)
-    nBlock = Int64(ceil((length(d_G.nzVal) + ThreadPerBlock - 1) / ThreadPerBlock))
+    # nBlock = Int64(ceil((length(d_G.nzVal) + ThreadPerBlock - 1) / ThreadPerBlock))
+    nBlock = cld(length(d_G.nzVal) + ThreadPerBlock - 1, ThreadPerBlock)
     CUDA.@sync begin
         CUDA.cudacall(get_rescale_csr_kernel(), 
         (CuPtr{Float64}, CuPtr{Int64}, CuPtr{Int64}, CuPtr{Float64}, CuPtr{Float64}, Int64, Int64),
@@ -721,7 +732,8 @@ function max_abs_col(d_G, result)
     nrows = Int64(nrows)
     ncols = Int64(ncols)
     result .= 1.0
-    nBlock = Int64(ceil((ncols + ThreadPerBlock + 1) * 32 / ThreadPerBlock))
+    #  nBlock = Int64(ceil((ncols + ThreadPerBlock + 1) * 32 / ThreadPerBlock))
+    nBlock = cld((ncols + ThreadPerBlock + 1) * 32, ThreadPerBlock)
 
     CUDA.@sync begin
         CUDA.cudacall(get_max_abs_col_kernel(), 
@@ -771,7 +783,8 @@ function alpha_norm_row(d_G, alpha, result)
     rowptr = d_G.rowPtr    # Access row pointers directly
     values = d_G.nzVal     # Access non-zero values directly
     nrows = size(d_G, 1)   # Number of rows
-    nBlock = Int64(ceil((nrows + ThreadPerBlock + 1) * 32 / ThreadPerBlock))
+    # nBlock = Int64(ceil((nrows + ThreadPerBlock + 1) * 32 / ThreadPerBlock))
+    nBlock = cld((nrows + ThreadPerBlock + 1) * 32, ThreadPerBlock)
     result .= 0.0
     CUDA.@sync begin
         CUDA.cudacall(get_alpha_norm_row_kernel(), 
@@ -820,7 +833,8 @@ end
 function alpha_norm_col(d_G, alpha, result)
     nrows = size(d_G, 1)
     ncols = size(d_G, 2)
-    nBlock = Int64(ceil((ncols + ThreadPerBlock + 1) * 32 / ThreadPerBlock))
+    # nBlock = Int64(ceil((ncols + ThreadPerBlock + 1) * 32 / ThreadPerBlock))
+    nBlock = cld((ncols + ThreadPerBlock + 1) * 32, ThreadPerBlock)
     result .= 0.0
     CUDA.@sync begin
         CUDA.cudacall(get_alpha_norm_col_kernel(), 
@@ -869,7 +883,8 @@ end
 
 function get_row_index(d_G, row_idx)
     nnz = length(d_G.nzVal)
-    nBlock = Int64(ceil((nnz + ThreadPerBlock + 1) / ThreadPerBlock))
+    # nBlock = Int64(ceil((nnz + ThreadPerBlock + 1) / ThreadPerBlock))
+    nBlock = cld(nnz + ThreadPerBlock + 1, ThreadPerBlock)
     nrows = size(d_G, 1)
     ncols = size(d_G, 2)
 
@@ -921,7 +936,8 @@ end
 
 function rescale_coo(d_G::CUDA.CUSPARSE.CuSparseMatrixCSR, row_scaling::CuArray, col_scaling::CuArray, m::Int64, n::Int64, row_idx::CuArray)
     nnz = length(d_G.nzVal)
-    nBlock = Int64(ceil((nnz + ThreadPerBlock + 1) / ThreadPerBlock))
+    # nBlock = Int64(ceil((nnz + ThreadPerBlock + 1) / ThreadPerBlock))
+    nBlock = cld(nnz + ThreadPerBlock + 1, ThreadPerBlock)
     CUDA.@sync begin
         CUDA.cudacall(get_rescale_coo_kernel(), 
         (CuPtr{Float64}, CuPtr{Int64}, CuPtr{Int64}, CuPtr{Float64}, CuPtr{Float64}, Int64, Int64),
@@ -974,7 +990,8 @@ function max_abs_row_elementwise(d_G, row_idx, result)
     nrows = Int64(nrows)
     result .= 0.0
     nnz = length(d_G.nzVal)
-    nBlock = Int64(ceil((nnz + ThreadPerBlock + 1) / ThreadPerBlock))
+    # nBlock = Int64(ceil((nnz + ThreadPerBlock + 1) / ThreadPerBlock))
+    nBlock = cld(nnz + ThreadPerBlock + 1, ThreadPerBlock)
     CUDA.@sync begin
         CUDA.cudacall(get_max_abs_row_elementwise_kernel(), 
         (CuPtr{Float64}, CuPtr{Int}, Int64, CuPtr{Float64}), 
@@ -1027,7 +1044,8 @@ function max_abs_col_elementwise(d_G, result)
     ncols = Int64(ncols)
     result .= 0.0
     nnz = length(d_G.nzVal)
-    nBlock = Int64(ceil((nnz + ThreadPerBlock + 1) / ThreadPerBlock))
+    # nBlock = Int64(ceil((nnz + ThreadPerBlock + 1) / ThreadPerBlock))
+    nBlock = cld(nnz + ThreadPerBlock + 1, ThreadPerBlock)
     k = get_max_abs_col_elementwise_kernel()
     CUDA.@sync begin
         CUDA.cudacall(k, 
@@ -1074,7 +1092,8 @@ end
 function alpha_norm_col_elementwise(d_G, alpha, result)
     nnz = length(d_G.nzVal)
     ncols = size(d_G, 2)
-    nBlock = Int64(ceil((nnz + ThreadPerBlock + 1) / ThreadPerBlock))
+    # nBlock = Int64(ceil((nnz + ThreadPerBlock + 1) / ThreadPerBlock))
+    nBlock = cld(nnz + ThreadPerBlock + 1, ThreadPerBlock)
     result .= 0.0
     CUDA.@sync begin
         CUDA.cudacall(get_alpha_norm_col_elementwise_kernel(), 
