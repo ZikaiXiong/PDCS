@@ -442,7 +442,7 @@ dGType<:Union{
 }}
     if logfile_name === nothing
         if verbose > 0
-            println("logfile is set to $logfile_name")
+            @info "logfile is set to $logfile_name"
         end
     else
         # 设置日志器并使用
@@ -1106,13 +1106,13 @@ dGType<:Union{
     destroy_cublas_handle(handle)
     @info ("===============================================")
     infoSummary(info = sol.info)
-    if use_preconditioner
-        @info (" norm(sol.x.recovered_primal.primal_sol.x, Inf): $(CUDA.norm(sol.x.recovered_primal.primal_sol.x, Inf))")
-        @info (" norm(sol.y.recovered_dual.dual_sol.y, Inf): $(CUDA.norm(sol.y.recovered_dual.dual_sol.y, Inf))")
-    else
-        @info (" norm(sol.x.primal_sol.x, Inf): $(CUDA.norm(sol.x.primal_sol.x, Inf))")
-        @info (" norm(sol.y.dual_sol.y, Inf): $(CUDA.norm(sol.y.dual_sol.y, Inf))")
-    end
+    # if use_preconditioner
+    #     @info (" norm(sol.x.recovered_primal.primal_sol.x, Inf): $(CUDA.norm(sol.x.recovered_primal.primal_sol.x, Inf))")
+    #     @info (" norm(sol.y.recovered_dual.dual_sol.y, Inf): $(CUDA.norm(sol.y.recovered_dual.dual_sol.y, Inf))")
+    # else
+    #     @info (" norm(sol.x.primal_sol.x, Inf): $(CUDA.norm(sol.x.primal_sol.x, Inf))")
+    #     @info (" norm(sol.y.dual_sol.y, Inf): $(CUDA.norm(sol.y.dual_sol.y, Inf))")
+    # end
     @info ("time for projection: $(time_proj)")
     @info ("time for iterative: $(time_iterative)")
     @info ("time for restart check: $(time_restart_check)")
@@ -1264,7 +1264,7 @@ function rpdhg_gpu_solve(;
 }
     if logfile_name === nothing
         if verbose > 0
-            println("logfile is set to $logfile_name")
+            @info "logfile is set to $logfile_name"
         end
     else
         # 设置日志器并使用
@@ -1797,7 +1797,7 @@ function rpdhg_gpu_solve(;
         else
             throw(ArgumentError("The rescaling method is not defined, two choices: :ruiz, :pock_chambolle, :ruiz_pock_chambolle"))
         end
-        println("scale_preconditioner")
+        # println("scale_preconditioner")
         scale_preconditioner!(
             Dr_product = solver.data.diagonal_scale.Dr_product.x,
             Dl_product = solver.data.diagonal_scale.Dl_product.y,
