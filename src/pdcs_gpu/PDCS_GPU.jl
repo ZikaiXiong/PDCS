@@ -8,11 +8,14 @@ using Base.Threads
 using JuMP
 using Polynomials
 using Statistics
-using CUDA
+using CUDA, PythonCall
+using CUDA.CUSPARSE
 using Libdl
-using JLD2 # for debugging
 using Logging
 using Dates
+import Base: unsafe_convert
+using Base.Threads: SpinLock
+
 # Logging.with_logger(Logging.NullLogger()) do
 #     CUDA.allowscalar(true)
 # end
@@ -38,6 +41,23 @@ CUDA.seed!(1)
 # main algorithm
 # include("./rpdhg_alg_gpu.jl")
 # include("./rpdhg_alg_gpu_plot.jl")
+
+const _kernlib_ref = Ref{Ptr{Cvoid}}(C_NULL)
+const few_block_proj_ptr = Ref{Ptr{Cvoid}}(C_NULL)
+
+
+function __init__()
+    # Open your own kernel library (NOT libcublas)
+    # Replace with the actual .so path in your project
+    libpath = joinpath(joinpath(MODULE_DIR, "cuda/libfew_block_proj.so"))
+
+    _kernlib_ref[] = Libdl.dlopen(libpath)
+
+    # IMPORTANT: symbol name must match EXACTLY what is exported by the .so
+    few_block_proj_ptr[] = Libdl.dlsym(_kernlib_ref[], :few_block_proj)
+
+    few_block_proj_ptr[] != C_NULL || error("Cannot find symbol `few_block_proj` in $libpath")
+end
 
 
 
@@ -87,6 +107,8 @@ include("./rpdhg_alg_gpu_gen.jl")
 
 include("./utils.jl")
 include("./MOI_wrapper/MOI_wrapper.jl")
+include("./cvxpy_wrapper/py2jl.jl")
+include("./cvxpy_wrapper/data_updating.jl")
 
 export rpdhg_gpu_solve;
 

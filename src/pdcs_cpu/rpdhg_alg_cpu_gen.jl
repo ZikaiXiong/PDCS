@@ -1490,13 +1490,13 @@ function rpdhg_cpu_solve(;
 
     println("===============================================")
     infoSummary(info = sol.info)
-    if use_preconditioner
-        println(" norm(sol.x.recovered_primal.primal_sol.x, Inf): ", norm(sol.x.recovered_primal.primal_sol.x, Inf))
-        println(" norm(sol.y.recovered_dual.dual_sol.y, Inf): ", norm(sol.y.recovered_dual.dual_sol.y, Inf))
-    else
-        println(" norm(sol.x.primal_sol.x, Inf): ", norm(sol.x.primal_sol.x, Inf))
-        println(" norm(sol.y.dual_sol.y, Inf): ", norm(sol.y.dual_sol.y, Inf))
-    end
+    # if use_preconditioner
+    #     println(" norm(sol.x.recovered_primal.primal_sol.x, Inf): ", norm(sol.x.recovered_primal.primal_sol.x, Inf))
+    #     println(" norm(sol.y.recovered_dual.dual_sol.y, Inf): ", norm(sol.y.recovered_dual.dual_sol.y, Inf))
+    # else
+    #     println(" norm(sol.x.primal_sol.x, Inf): ", norm(sol.x.primal_sol.x, Inf))
+    #     println(" norm(sol.y.dual_sol.y, Inf): ", norm(sol.y.dual_sol.y, Inf))
+    # end
     println("time for projection: ", time_proj)
     GC.gc()
     return solver.sol

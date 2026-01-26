@@ -8,6 +8,9 @@ using LinearAlgebra
 using JuMP
 using Random, SparseArrays
 import MathOptInterface as MOI
+using CUDA
+
+
 rng = Random.MersenneTwister(2)
 basedim = Int64(100)
 n = 2 * basedim # number of variables
@@ -39,3 +42,54 @@ set_optimizer_attribute(model, "verbose", 2)
 # (A * x - b)[m_zero+m_nonnegative+1:end] in SOC
 @constraint(model, (A * x - b)[m_zero+m_nonnegative+1:end] in SecondOrderCone())
 optimize!(model)
+
+
+
+sol_res = PDCS_GPU.rpdhg_gpu_solve(
+    n = n,
+    m = m,
+    nb = n,
+    c_cpu = c,
+    G_cpu = A,
+    h_cpu = b,
+    mGzero = m_zero,
+    mGnonnegative = m_nonnegative,
+    socG = Vector{Integer}([m - m_zero - m_nonnegative]),
+    rsocG = Vector{Integer}([]),
+    expG = 0,
+    dual_expG = 0,
+    bl_cpu = zeros(n),
+    bu_cpu = ones(n) * Inf,
+    soc_x = Vector{Integer}([]),
+    rsoc_x = Vector{Integer}([]),
+    exp_x = 0,
+    dual_exp_x = 0,
+    use_preconditioner = true,
+    method = :average
+)
+
+
+
+G_gpu = CUDA.CUSPARSE.CuSparseMatrixCSR(A)
+sol_res = PDCS_GPU.rpdhg_gpu_solve_input_gpu_data(
+    n = n,
+    m = m,
+    nb = n,
+    c_gpu = CuArray(c),
+    G_gpu = G_gpu,
+    h_gpu = CuArray(b),
+    mGzero = m_zero,
+    mGnonnegative = m_nonnegative,
+    socG = Vector{Integer}([m - m_zero - m_nonnegative]),
+    rsocG = Vector{Integer}([]),
+    expG = 0,
+    dual_expG = 0,
+    bl_gpu = CuArray(zeros(n)),
+    bu_gpu = CuArray(ones(n) * Inf),
+    soc_x = Vector{Integer}([]),
+    rsoc_x = Vector{Integer}([]),
+    exp_x = 0,
+    dual_exp_x = 0,
+    use_preconditioner = true,
+    method = :average
+)

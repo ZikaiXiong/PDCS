@@ -1,9 +1,18 @@
+# Example: Using PDCS after installation as a package
+# This replaces the old method of using include() statements
+
 using Pkg
-Pkg.activate("pdcs_env")
-include("../src/pdcs_gpu/PDCS_GPU.jl")
-include("../src/pdcs_cpu/PDCS_CPU.jl")
-using .PDCS_GPU
-using .PDCS_CPU
+# Pkg.activate("pdcs_env")
+Pkg.resolve()  # 确保依赖更新
+
+# After installing PDCS as a package (see INSTALL.md), use:
+using PDCS
+using PDCS.PDCS_GPU
+using PDCS.PDCS_CPU
+
+# Or alternatively:
+# using PDCS: PDCS_GPU, PDCS_CPU
+
 using LinearAlgebra
 using JuMP
 using Random, SparseArrays

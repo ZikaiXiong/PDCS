@@ -1,3 +1,4 @@
+### discard, we don't develop rsoc recently.
 using Pkg
 Pkg.activate("pdcs_env")
 include("../src/pdcs_gpu/PDCS_GPU.jl")

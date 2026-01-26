@@ -909,7 +909,7 @@ mutable struct rpdhgRawData{
         }
         bl_finite = deepcopy(bl)
         bu_finite = deepcopy(bu)
-        println("consider bl_finite: ")
+        # println("consider bl_finite: ")
         n = length(bl)
         if n > 0
             # CUDA.@allowscalar bl_finite = replace(bl_finite, -Inf=>0.0)
@@ -968,25 +968,73 @@ mutable struct probData{
     cNrmInf::rpdhg_float
     diagonal_scale::Diagonal_preconditioner
     raw_data::Union{rpdhgRawData,Nothing}
-    function probData(; m::Integer, n::Integer, nb::Integer,
-         c_cpu::AbstractVector{rpdhg_float}, coeff::coeffType, coeffTrans::coeffTransType,
-         GlambdaMax::rpdhg_float, GlambdaMax_flag::Integer, bl_cpu::AbstractVector{rpdhg_float}, bu_cpu::AbstractVector{rpdhg_float},
-         diagonal_scale::Diagonal_preconditioner, raw_data::Union{rpdhgRawData,Nothing}) where{
-            coeffType<:Union{coeffUnion},
-            coeffTransType<:Union{coeffUnion},
-         }
-        bl_finite = deepcopy(bl_cpu)
-        bu_finite = deepcopy(bu_cpu)
-        if length(bl_cpu) > 0
-            bl_finite = replace(bl_finite, -Inf=>0.0)
-            bu_finite = replace(bu_finite, Inf=>0.0)
-        end
-        d_c = CuArray(c_cpu)
-        d_bl = CuArray(bl_cpu)
-        d_bu = CuArray(bu_cpu)
-        (hNrm1, hNrm2, cNrm1, cNrm2, hNrmInf, cNrmInf) = cal_constant(; c = d_c, h = coeff.d_h)
-        new{CuArray, coeffType, coeffTransType}(m, n, nb, d_c, coeff, coeffTrans, GlambdaMax, GlambdaMax_flag, d_bl, d_bu, bl_finite, bu_finite, hNrm1, hNrm2, cNrm1, cNrm2, hNrmInf, cNrmInf, diagonal_scale, raw_data)
+end
+
+"""
+    probData_from_cpu_data(; m, n, nb, c_cpu, coeff, coeffTrans, GlambdaMax, GlambdaMax_flag, bl_cpu, bu_cpu, diagonal_scale, raw_data)
+Create a `probData` struct from CPU-side problem data.
+"""
+function probData_from_cpu_data(; m::Integer, n::Integer, nb::Integer,
+    c_cpu::AbstractVector{rpdhg_float},
+    coeff::coeffType,
+    coeffTrans::coeffTransType,
+    GlambdaMax::rpdhg_float,
+    GlambdaMax_flag::Integer,
+    bl_cpu::AbstractVector{rpdhg_float},
+    bu_cpu::AbstractVector{rpdhg_float},
+    diagonal_scale::Diagonal_preconditioner,
+    raw_data::Union{rpdhgRawData,Nothing}
+) where {
+    coeffType<:Union{coeffUnion},
+    coeffTransType<:Union{coeffUnion}
+}
+    bl_finite = deepcopy(bl_cpu)
+    bu_finite = deepcopy(bu_cpu)
+    if length(bl_cpu) > 0
+        bl_finite = replace(bl_finite, -Inf=>0.0)
+        bu_finite = replace(bu_finite, Inf=>0.0)
     end
+    d_c = CuArray(c_cpu)
+    d_bl = CuArray(bl_cpu)
+    d_bu = CuArray(bu_cpu)
+    (hNrm1, hNrm2, cNrm1, cNrm2, hNrmInf, cNrmInf) = cal_constant(; c = d_c, h = coeff.d_h)
+    return probData{CuArray, coeffType, coeffTransType}(
+        m, n, nb, d_c, coeff, coeffTrans, GlambdaMax, GlambdaMax_flag, d_bl, d_bu, bl_finite, bu_finite, hNrm1, hNrm2, cNrm1, cNrm2, hNrmInf, cNrmInf, diagonal_scale, raw_data
+    )
+end
+
+"""
+    probData_from_gpu_data(; m, n, nb, c_gpu, coeff, coeffTrans, GlambdaMax, GlambdaMax_flag, bl_gpu, bu_gpu, diagonal_scale, raw_data)
+Create a `probData` struct from GPU-side problem data (inputs are already on the GPU).
+"""
+function probData_from_gpu_data(; 
+    m::Integer, 
+    n::Integer, 
+    nb::Integer,
+    c_gpu::CuArray,
+    coeff::coeffType,
+    coeffTrans::coeffTransType,
+    GlambdaMax::rpdhg_float,
+    GlambdaMax_flag::Integer,
+    bl_gpu::CuArray,
+    bu_gpu::CuArray,
+    diagonal_scale::Diagonal_preconditioner,
+    raw_data::Union{rpdhgRawData,Nothing}
+) where {coeffType<:Union{coeffUnion}, coeffTransType<:Union{coeffUnion}}
+
+    bl_finite = deepcopy(Array(bl_gpu))
+    bu_finite = deepcopy(Array(bu_gpu))
+    if length(bl_finite) > 0
+        bl_finite = replace(bl_finite, -Inf=>0.0)
+        bu_finite = replace(bu_finite, Inf=>0.0)
+    end
+
+    # cal_constant expects GPU arrays
+    (hNrm1, hNrm2, cNrm1, cNrm2, hNrmInf, cNrmInf) = cal_constant(; c = c_gpu, h = coeff.d_h)
+
+    return probData{CuArray, coeffType, coeffTransType}(
+        m, n, nb, c_gpu, coeff, coeffTrans, GlambdaMax, GlambdaMax_flag, bl_gpu, bu_gpu, bl_finite, bu_finite, hNrm1, hNrm2, cNrm1, cNrm2, hNrmInf, cNrmInf, diagonal_scale, raw_data
+    )
 end
 
 mutable struct rpdhgSolver
@@ -1002,3 +1050,168 @@ mutable struct rpdhgSolver
     end
 end
 
+mutable struct PDCS_GPU_Solver
+    n::Integer
+    m::Integer
+    nb::Integer
+    c::Union{Vector{rpdhg_float}, CuArray}
+    G::Union{AbstractMatrix{rpdhg_float}, CUDA.CUSPARSE.CuSparseMatrixCSR{Float64,Int32}, CUDA.CUSPARSE.CuSparseMatrixCSR{Float64,Int64}}
+    h::Union{Vector{rpdhg_float}, CuArray}
+    mGzero::Integer
+    mGnonnegative::Integer
+    socG::Vector{Integer}
+    rsocG::Vector{Integer}
+    expG::Integer
+    dual_expG::Integer
+    bl::Union{Vector{rpdhg_float}, CuArray}
+    bu::Union{Vector{rpdhg_float}, CuArray}
+    soc_x::Vector{Integer}
+    rsoc_x::Vector{Integer}
+    exp_x::Integer
+    dual_exp_x::Integer
+    Dl::Union{Vector{rpdhg_float}, CuArray}
+    Dr::Union{Vector{rpdhg_float}, CuArray}
+    rescaling_method::Symbol
+    use_preconditioner::Bool
+    use_adaptive_restart::Bool
+    use_adaptive_step_size_weight::Bool
+    use_aggressive::Bool
+    use_accelerated::Bool
+    use_resolving::Bool
+    primal_sol::Union{Vector{rpdhg_float}, CuArray}
+    dual_sol::Union{Vector{rpdhg_float}, CuArray}
+    warm_start::Bool
+    max_outer_iter::Integer
+    max_inner_iter::Integer
+    abs_tol::rpdhg_float
+    rel_tol::rpdhg_float
+    eps_primal_infeasible_low_acc::rpdhg_float
+    eps_dual_infeasible_low_acc::rpdhg_float
+    eps_primal_infeasible_high_acc::rpdhg_float
+    eps_dual_infeasible_high_acc::rpdhg_float
+    print_freq::Integer
+    check_terminate_freq::Integer
+    verbose::Integer
+    time_limit::Float64
+    method::Symbol
+    logfile_name::Union{String, Nothing}
+    use_kkt_restart::Bool
+    kkt_restart_freq::Integer
+    use_duality_gap_restart::Bool
+    duality_gap_restart_freq::Integer
+    function PDCS_GPU_Solver(; 
+        n::Integer,
+        m::Integer,
+        nb::Integer,
+        c::Union{Vector{rpdhg_float}, CuArray},
+        G::AbstractMatrix{rpdhg_float},
+        h::Union{Vector{rpdhg_float}, CuArray},
+        mGzero::Integer, # m of Q for zero cone
+        mGnonnegative::Integer, # m of Q for positive cone
+        socG::Vector{<:Integer},
+        rsocG::Vector{<:Integer},
+        expG::Integer,
+        dual_expG::Integer,
+        bl::Union{Vector{rpdhg_float}, CuArray},
+        bu::Union{Vector{rpdhg_float}, CuArray},
+        soc_x::Vector{<:Integer},
+        rsoc_x::Vector{<:Integer},
+        exp_x::Integer = 0,
+        dual_exp_x::Integer = 0,
+        Dl::Union{Vector{rpdhg_float}, CuArray} = ones(m),
+        Dr::Union{Vector{rpdhg_float}, CuArray} = ones(n),
+        rescaling_method::Symbol = :ruiz_pock_chambolle,
+        use_preconditioner::Bool = true,
+        use_adaptive_restart::Bool = true,
+        use_adaptive_step_size_weight::Bool = true,
+        use_aggressive::Bool = true,
+        use_accelerated::Bool = false,
+        use_resolving::Bool = true,
+        primal_sol::Union{Vector{rpdhg_float}, CuArray} = zeros(n),
+        dual_sol::Union{Vector{rpdhg_float}, CuArray} = zeros(m),
+        warm_start::Bool = false,
+        max_outer_iter::Integer = 10000,
+        max_inner_iter::Integer = 500000,
+        abs_tol::rpdhg_float = 1e-6,
+        rel_tol::rpdhg_float = 1e-6,
+        eps_primal_infeasible_low_acc::rpdhg_float = 1e-12,
+        eps_dual_infeasible_low_acc::rpdhg_float = 1e-12,
+        eps_primal_infeasible_high_acc::rpdhg_float = 1e-16,
+        eps_dual_infeasible_high_acc::rpdhg_float = 1e-16,
+        print_freq::Integer = 2000,
+        check_terminate_freq::Integer = 2000,
+        verbose::Integer = 1,
+        time_limit::Float64 = Inf,
+        method::Symbol = :average,
+        logfile_name::Union{String, Nothing} = nothing,
+        use_kkt_restart::Bool = false,
+        kkt_restart_freq::Integer = 2000,
+        use_duality_gap_restart::Bool = true,
+        duality_gap_restart_freq::Integer = 2000
+    )
+        if c isa CuArray
+            if isa(Dl, Vector{rpdhg_float})
+                Dl = CuArray(Dl)
+            end
+            if isa(Dr, Vector{rpdhg_float})
+                Dr = CuArray(Dr)
+            end
+            if isa(primal_sol, Vector{rpdhg_float})
+                primal_sol = CuArray(primal_sol)
+            end
+            if isa(dual_sol, Vector{rpdhg_float})
+                dual_sol = CuArray(dual_sol)
+            end
+        end
+        new(
+            n,
+            m,
+            nb,
+            c,
+            G,
+            h,
+            mGzero,
+            mGnonnegative,
+            socG,
+            rsocG,
+            expG,
+            dual_expG,
+            bl,
+            bu,
+            soc_x,
+            rsoc_x,
+            exp_x,
+            dual_exp_x,
+            Dl,
+            Dr,
+            rescaling_method,   
+            use_preconditioner,
+            use_adaptive_restart,
+            use_adaptive_step_size_weight,
+            use_aggressive,
+            use_accelerated,
+            use_resolving,
+            primal_sol,
+            dual_sol,
+            warm_start,
+            max_outer_iter,
+            max_inner_iter,     
+            abs_tol,
+            rel_tol,    
+            eps_primal_infeasible_low_acc,
+            eps_dual_infeasible_low_acc,
+            eps_primal_infeasible_high_acc,
+            eps_dual_infeasible_high_acc,
+            print_freq,
+            check_terminate_freq,
+            verbose,
+            time_limit,
+            method,
+            logfile_name,
+            use_kkt_restart,
+            kkt_restart_freq,
+            use_duality_gap_restart,
+            duality_gap_restart_freq,
+        )
+    end
+end

@@ -339,22 +339,22 @@ function setFunctionPointerPrimal!(sol::solVecPrimal, primalConstScale::Vector{B
     sol.primal_sol.x_slice_proj_kernel_slack_device = CuArray{Int64}(sol.primal_sol.x_slice_proj_kernel_slack)
 
     if sol.primal_sol.blkLen <= 3 && !any(k -> k in (8, 9, 10, 23, 24, 25), sol.primal_sol.x_slice_proj_kernel)
-        println("few primal proj");
+        @info("few primal proj");
         sol.proj! = few_primal_proj!
         sol.slack_proj! = few_slack_proj!
         sol.proj_diagonal! = few_primal_proj_diagonal!
     elseif sol.primal_sol.blkLen <= 1000 || maximum(sol.primal_sol.x_slice_length_cpu[3:end]) >= 2000
-        println("moderate primal proj");
+        @info("moderate primal proj");
         sol.proj! = moderate_primal_proj!
         sol.slack_proj! = moderate_slack_proj!
         sol.proj_diagonal! = moderate_primal_proj_diagonal!
     elseif sol.primal_sol.blkLen <= 60000 || maximum(sol.primal_sol.x_slice_length_cpu[3:end]) >= 150
-        println("sufficient primal proj");
+        @info("sufficient primal proj");
         sol.proj! = sufficient_primal_proj!
         sol.slack_proj! = sufficient_slack_proj!
         sol.proj_diagonal! = sufficient_primal_proj_diagonal!
     else
-        println("massive primal proj");
+        @info("massive primal proj");
         sol.proj! = massive_primal_proj!
         sol.slack_proj! = massive_slack_proj!
         sol.proj_diagonal! = massive_primal_proj_diagonal!
@@ -804,22 +804,22 @@ function setFunctionPointerDual!(dualSol::solVecDual, primalConstScale::Vector{B
     dualSol.dual_sol_temp.y_slice_con_proj_kernel_device = dualSol.dual_sol.y_slice_con_proj_kernel_device
 
     if dualSol.dual_sol.blkLen <= 3 && !any(k -> k in (8, 9, 10, 23, 24, 25), dualSol.dual_sol.y_slice_proj_kernel)
-        println("few dual proj");
+        @info("few dual proj");
         dualSol.proj! = few_dual_proj!
         dualSol.proj_diagonal! = few_dual_proj_diagonal!
         dualSol.con_proj! = few_con_proj!
     elseif dualSol.dual_sol.blkLen <= 1000 || maximum(dualSol.dual_sol.y_slice_length_cpu[3:end]) >= 2000
-        println("moderate dual proj");
+        @info("moderate dual proj");
         dualSol.proj! = moderate_dual_proj!
         dualSol.proj_diagonal! = moderate_dual_proj_diagonal!
         dualSol.con_proj! = moderate_con_proj!
     elseif dualSol.dual_sol.blkLen <= 60000 || maximum(dualSol.dual_sol.y_slice_length_cpu[3:end]) >= 150
-        println("sufficient dual proj");
+        @info("sufficient dual proj");
         dualSol.proj! = sufficient_dual_proj!
         dualSol.proj_diagonal! = sufficient_dual_proj_diagonal!
         dualSol.con_proj! = sufficient_con_proj!
     else
-        println("massive dual proj");
+        @info("massive dual proj");
         dualSol.proj! = massive_dual_proj!
         dualSol.proj_diagonal! = massive_dual_proj_diagonal!
         dualSol.con_proj! = massive_con_proj!
@@ -943,7 +943,45 @@ function setFunctionPointer(solver::rpdhgSolver)
 end
 
 
-function create_raw_data(;
+function create_raw_data_from_gpu_data(;
+    m::Integer,
+    n::Integer,
+    nb::Integer,
+    c_gpu::AbstractVector{rpdhg_float},
+    coeff::coeffType,
+    bl_gpu::AbstractVector{rpdhg_float},
+    bu_gpu::AbstractVector{rpdhg_float},
+    hNrm1::rpdhg_float, cNrm1::rpdhg_float, 
+    hNrmInf::rpdhg_float, cNrmInf::rpdhg_float
+) where coeffType<:Union{coeffUnion}
+    coeffCopy = deepcopy(coeff)
+    coeffCopyTrans = coeffUnion(
+        G = nothing,
+        h = nothing,
+        m = coeffCopy.m,
+        n = coeffCopy.n,
+        d_G = coeffCopy.d_G,
+        d_h = coeffCopy.d_h,
+    )
+    raw_data = rpdhgRawData(
+        m = m,
+        n = n,
+        nb = nb,  
+        c = c_gpu,
+        coeff = coeffCopy,
+        coeffTrans = coeffCopyTrans,
+        bl = bl_gpu,
+        bu = bu_gpu,
+        hNrm1 = hNrm1,
+        cNrm1 = cNrm1,
+        hNrmInf = hNrmInf,
+        cNrmInf = cNrmInf,
+    )
+    return raw_data
+end
+
+
+function create_raw_data_from_cpu_data(;
     m::Integer,
     n::Integer,
     nb::Integer,
