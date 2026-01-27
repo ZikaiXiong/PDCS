@@ -6,7 +6,13 @@ import cupy as cp
 from cupyx.scipy.sparse import csr_matrix
 
 jl.seval('using Pkg')
-# jl.seval("Pkg.activate(\"./PDCS_fork/test/pdcs_env\")")
+jl.seval("Pkg.activate(\"./pdcs_env\")")
+jl.seval("""
+Pkg.add("CUDA")
+Pkg.add("SparseMatricesCSR")
+Pkg.add("JuMP")
+Pkg.add("MathOptInterface")
+""")
 # jl.seval('Pkg.add("PythonCall")')
 # jl.seval('using PythonCall')
 jl.seval('using LinearAlgebra, SparseArrays')
@@ -49,8 +55,6 @@ jl.G_gpu = jl.PDCS_GPU.cupy_to_cucsrmat(
 )
 
 jl.seval('''
-using .PDCS_GPU
-using .PDCS_CPU
 using LinearAlgebra
 using JuMP
 using Random, SparseArrays

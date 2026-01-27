@@ -48,7 +48,7 @@ Install the `PDCS` package in Julia using the following command:
 
 ```julia
 using Pkg
-Pkg.develop(path="PDCS/src")
+Pkg.develop(path="PDCS")
 ```
 
 Note: The installation process will execute a small demonstration for precompilation purposes. Verbose logging will only occur during the initial installation.
