@@ -1,3 +1,4 @@
+__precompile__()
 module PDCS_CPU
 
 using Random, SparseArrays, LinearAlgebra
@@ -8,6 +9,7 @@ using Base.Threads
 using JuMP
 using Polynomials
 using Statistics
+using SnoopPrecompile
 
 const rpdhg_float = Float64
 const rpdhg_int = Int32
@@ -46,6 +48,15 @@ include("./rpdhg_alg_cpu_gen.jl")
 
 include("./utils.jl")
 include("./MOI_wrapper/MOI_wrapper.jl")
+
+include("./precompile.jl")
+redirect_stdout(devnull) do; 
+    SnoopPrecompile.@precompile_all_calls begin
+        @info "============precompile PDCS_CPU============"
+        __precompile_cpu()
+        @info "============precompile PDCS_CPU done============"
+    end
+end
 
 export rpdhg_cpu_solve;
 

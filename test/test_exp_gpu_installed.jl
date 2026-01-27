@@ -2,17 +2,12 @@
 # This replaces the old method of using include() statements
 
 using Pkg
-# Pkg.activate("pdcs_env")
-Pkg.resolve()  # 确保依赖更新
-
-# After installing PDCS as a package (see INSTALL.md), use:
-using PDCS
-using PDCS.PDCS_GPU
-using PDCS.PDCS_CPU
+Pkg.activate("pdcs_env")
+using PDCS: PDCS_GPU, PDCS_CPU
 
 # Or alternatively:
 # using PDCS: PDCS_GPU, PDCS_CPU
-
+time_start = time()
 using LinearAlgebra
 using JuMP
 using Random, SparseArrays
@@ -137,3 +132,6 @@ sol_res = PDCS_GPU.rpdhg_gpu_solve_input_gpu_data(
     # max_outer_iter = 3,
     # max_inner_iter = 10,
 )
+
+time_end = time()
+println("Time taken: $(time_end - time_start) seconds")
