@@ -442,6 +442,7 @@ dGType<:Union{
 }}
     if logfile_name === nothing
         if verbose > 0
+            @info "verbose is set to $verbose"
             @info "logfile is set to $logfile_name"
         end
     else
@@ -1105,19 +1106,21 @@ dGType<:Union{
     end
     destroy_cublas_handle(handle)
     @info ("===============================================")
-    infoSummary(info = sol.info)
-    # if use_preconditioner
-    #     @info (" norm(sol.x.recovered_primal.primal_sol.x, Inf): $(CUDA.norm(sol.x.recovered_primal.primal_sol.x, Inf))")
-    #     @info (" norm(sol.y.recovered_dual.dual_sol.y, Inf): $(CUDA.norm(sol.y.recovered_dual.dual_sol.y, Inf))")
-    # else
-    #     @info (" norm(sol.x.primal_sol.x, Inf): $(CUDA.norm(sol.x.primal_sol.x, Inf))")
-    #     @info (" norm(sol.y.dual_sol.y, Inf): $(CUDA.norm(sol.y.dual_sol.y, Inf))")
-    # end
-    @info ("time for projection: $(time_proj)")
-    @info ("time for iterative: $(time_iterative)")
-    @info ("time for restart check: $(time_restart_check)")
-    @info ("time for exit check: $(time_exit_check)")
-    @info ("time for print info calculation: $(time_print_info_cal)")
+    if verbose > 0
+        infoSummary(info = sol.info)
+        # if use_preconditioner
+        #     @info (" norm(sol.x.recovered_primal.primal_sol.x, Inf): $(CUDA.norm(sol.x.recovered_primal.primal_sol.x, Inf))")
+        #     @info (" norm(sol.y.recovered_dual.dual_sol.y, Inf): $(CUDA.norm(sol.y.recovered_dual.dual_sol.y, Inf))")
+        # else
+        #     @info (" norm(sol.x.primal_sol.x, Inf): $(CUDA.norm(sol.x.primal_sol.x, Inf))")
+        #     @info (" norm(sol.y.dual_sol.y, Inf): $(CUDA.norm(sol.y.dual_sol.y, Inf))")
+        # end
+        @info ("time for projection: $(time_proj)")
+        @info ("time for iterative: $(time_iterative)")
+        @info ("time for restart check: $(time_restart_check)")
+        @info ("time for exit check: $(time_exit_check)")
+        @info ("time for print info calculation: $(time_print_info_cal)")
+    end
     if logfile_name !== nothing
         close(logfile)
     end
@@ -1931,20 +1934,22 @@ function rpdhg_gpu_solve(;
     #     @info CUDA.memory_status()
     # end
     destroy_cublas_handle(handle)
-    @info ("===============================================")
-    infoSummary(info = sol.info)
-    if use_preconditioner
-        @info (" norm(sol.x.recovered_primal.primal_sol.x, Inf): $(CUDA.norm(sol.x.recovered_primal.primal_sol.x, Inf))")
-        @info (" norm(sol.y.recovered_dual.dual_sol.y, Inf): $(CUDA.norm(sol.y.recovered_dual.dual_sol.y, Inf))")
-    else
-        @info (" norm(sol.x.primal_sol.x, Inf): $(CUDA.norm(sol.x.primal_sol.x, Inf))")
-        @info (" norm(sol.y.dual_sol.y, Inf): $(CUDA.norm(sol.y.dual_sol.y, Inf))")
+    if verbose > 0
+        @info ("===============================================")
+        infoSummary(info = sol.info)
+        if use_preconditioner
+            @info (" norm(sol.x.recovered_primal.primal_sol.x, Inf): $(CUDA.norm(sol.x.recovered_primal.primal_sol.x, Inf))")
+            @info (" norm(sol.y.recovered_dual.dual_sol.y, Inf): $(CUDA.norm(sol.y.recovered_dual.dual_sol.y, Inf))")
+        else
+            @info (" norm(sol.x.primal_sol.x, Inf): $(CUDA.norm(sol.x.primal_sol.x, Inf))")
+            @info (" norm(sol.y.dual_sol.y, Inf): $(CUDA.norm(sol.y.dual_sol.y, Inf))")
+        end
+        @info ("time for projection: $(time_proj)")
+        @info ("time for iterative: $(time_iterative)")
+        @info ("time for restart check: $(time_restart_check)")
+        @info ("time for exit check: $(time_exit_check)")
+        @info ("time for print info calculation: $(time_print_info_cal)")
     end
-    @info ("time for projection: $(time_proj)")
-    @info ("time for iterative: $(time_iterative)")
-    @info ("time for restart check: $(time_restart_check)")
-    @info ("time for exit check: $(time_exit_check)")
-    @info ("time for print info calculation: $(time_print_info_cal)")
     if logfile_name !== nothing
         close(logfile)
     end
@@ -1993,7 +1998,8 @@ function solve_with_solver(solver::PDCS_GPU_Solver)
             use_kkt_restart = solver.use_kkt_restart,
             kkt_restart_freq = solver.kkt_restart_freq,
             use_duality_gap_restart = solver.use_duality_gap_restart,
-            duality_gap_restart_freq = solver.duality_gap_restart_freq
+            duality_gap_restart_freq = solver.duality_gap_restart_freq,
+            verbose = solver.verbose
         )
     else
         rpdhg_gpu_solve(
@@ -2034,7 +2040,8 @@ function solve_with_solver(solver::PDCS_GPU_Solver)
             use_kkt_restart = solver.use_kkt_restart,
             kkt_restart_freq = solver.kkt_restart_freq,
             use_duality_gap_restart = solver.use_duality_gap_restart,
-            duality_gap_restart_freq = solver.duality_gap_restart_freq
+            duality_gap_restart_freq = solver.duality_gap_restart_freq,
+            verbose = solver.verbose
         )
     end
 
