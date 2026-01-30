@@ -1105,7 +1105,9 @@ dGType<:Union{
         CUDA.memory_status()
     end
     destroy_cublas_handle(handle)
-    @info ("===============================================")
+    if verbose > 0
+        @info ("===============================================")
+    end
     if verbose > 0
         infoSummary(info = sol.info)
         # if use_preconditioner
