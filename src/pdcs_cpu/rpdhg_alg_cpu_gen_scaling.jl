@@ -217,7 +217,7 @@ end
 function initialize_primal_weight(; solver::rpdhgSolver)
     hNrm2 = norm(solver.data.coeff.h, 2)
     cNrm2 = norm(solver.data.c, 2)
-    println("hNrm2:", hNrm2, " cNrm2:", cNrm2)
+    # println("hNrm2:", hNrm2, " cNrm2:", cNrm2)
     if hNrm2 > 1e-10 && cNrm2 > 1e-10
         omega = cNrm2 / hNrm2
     else

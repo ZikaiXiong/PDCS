@@ -271,7 +271,7 @@ end
 function initialize_primal_weight(; solver::rpdhgSolver)
     hNrm2 = CUDA.norm(solver.data.coeff.d_h, 2)
     cNrm2 = CUDA.norm(solver.data.d_c, 2)
-    @info ("hNrm2: $(hNrm2), cNrm2: $(cNrm2)")
+    # @info ("hNrm2: $(hNrm2), cNrm2: $(cNrm2)")
     if hNrm2 > 1e-10 && cNrm2 > 1e-10
         omega = cNrm2 / hNrm2
     else

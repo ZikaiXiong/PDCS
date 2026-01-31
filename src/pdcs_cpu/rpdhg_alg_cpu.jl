@@ -593,7 +593,9 @@ function rpdhg_cpu_solve(;
     else
         throw(ArgumentError("The method is not defined."))
     end
-    println("===============================================")
-    infoSummary(info = sol.info)
+    if verbose > 0
+        println("===============================================")
+        infoSummary(info = sol.info)
+    end
     return sol
 end
