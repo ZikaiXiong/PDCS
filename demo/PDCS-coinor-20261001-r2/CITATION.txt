@@ -1,0 +1,6 @@
+PDCS: A Primal-Dual Large-Scale Conic Programming Solver with GPU Enhancements
+Zhenwei Lin, Zikai Xiong, Dongdong Ge, Yinyu Ye (2025)
+https://arxiv.org/abs/2505.00311
+
+This citation is preserved from the source README.md. Paper authorship, code
+authorship (AUTHORS) and copyright ownership (OWNERSHIP.txt) are distinct records.

@@ -1,0 +1,42 @@
+                Contributor's Statement of Respect for Ownership
+
+I, ________________________________________, certify that
+
+(a) I have read and understood the statement below on Ownership of
+    Intellectual Property;
+
+(b) for any contribution I make to the COIN-OR Foundation repository, I will
+    make all reasonable efforts to determine the legal owners of the 
+    contribution, and I will obtain the permission of the owners of the 
+    contribution to make the contribution available under an open source
+    license certified by the Open Source Initiative;
+
+(c) if I am employed, I have discussed contributing to COIN-OR with my
+    employer, ______________________________________________________,
+    and have obtained their permission to contribute or have determined that
+    they do not assert ownership rights to my contributions;
+
+(d) I will not knowingly submit any contribution of which I am not the owner
+    or for which I do not have the owner's permission;
+
+(e) for any contribution I make to an existing project I will use
+    the same license the project was released under.
+
+===============================================================================
+
+                    Ownership of Intellectual Property
+
+The creator of a work may not be the sole owner of the intellectual property
+associated with the work.  In general, *any* individual or organization which
+contributed resources to the development of a work may be a co-owner.  The
+legal ownership depends on the particulars of the situation and the contracts
+involved.  Some employment contracts assert that the employer has ownership
+rights to any work created by the employee, even if that work is created
+outside of regular working hours and without the use of the organization's
+resources.  Also, an employer may be fine with contributions to one project
+but not to another.
+
+Contributors should consult with their management, legal counsel, and/or
+technology transfer officers when determining the legal ownership of a
+contribution.
+

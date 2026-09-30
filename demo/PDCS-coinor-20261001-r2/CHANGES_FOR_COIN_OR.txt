@@ -1,0 +1,23 @@
+PDCS preparation changes -- package label 20261001-r2
+
+Base: zhenweilin/PDCS_fork, coin_or, commit
+966385736b25bea85f29be81bff8984f35c3b7af.
+
+That branch adds the documented CPU test module and optional hardware suite,
+keeps CUDA optional, documents installation and maintainership, removes unused
+dependencies, and removes research datasets, cluster workflows, obsolete tests
+and unused solver files from the submission tree.
+
+This release folder preserves all 74 base files byte-for-byte. It adds a README
+with the standard COIN-OR filename, a CPU/GPU/all build-and-test wrapper, source
+provenance and SHA-256 manifests, actual validation evidence, the existing paper
+citation, an ownership-status record, attribution/license material for the
+CuClarabel-derived bridge helpers, and unsigned official submission templates.
+
+No numerical solver code was changed to make this folder. The build wrapper's
+GPU environment defaults to the tested CUDA.jl 5.11.3; existing source supports
+the version range declared in Project.toml. The new CUDA.jl 6.4.1 hardware audit
+is tracked separately and is not presented as a completed test.
+
+The cuPDLP-C folder was used as a packaging-layout reference only. Its code,
+authors, ownership claims, solver cases and validation results were not copied.

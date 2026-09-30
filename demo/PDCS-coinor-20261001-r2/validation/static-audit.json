@@ -1,0 +1,33 @@
+{
+  "commit": "966385736b25bea85f29be81bff8984f35c3b7af",
+  "files_matching_local": 74,
+  "literal_julia_includes": 41,
+  "cuda_local_includes": 23,
+  "dynamic_includes_reviewed": [
+    "ext/PDCSGPUExt.jl: include(joinpath(pkgdir(PDCS), \"src\", \"pdcs_gpu\", \"PDCS_GPU.jl\"))",
+    "test/test_plain_multi_logger.jl: include(LOGGER_PATH)",
+    "test/test_projection_strategy.jl: include(joinpath(@__DIR__, \"..\", \"src\", \"pdcs_gpu\", \"projection_strategy.jl\"))"
+  ],
+  "import_roots": [
+    "Base",
+    "CUDA",
+    "DataStructures",
+    "Dates",
+    "JuMP",
+    "Libdl",
+    "LinearAlgebra",
+    "Logging",
+    "Match",
+    "MathOptInterface",
+    "PDCS",
+    "Polynomials",
+    "Printf",
+    "PythonCall",
+    "Random",
+    "SnoopPrecompile",
+    "SparseArrays",
+    "Statistics",
+    "Test"
+  ],
+  "errors": []
+}

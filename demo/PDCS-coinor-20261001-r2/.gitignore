@@ -1,0 +1,11 @@
+/Manifest.toml
+/build/
+/pdcs_env/
+*.so
+*.ptx
+*.ji
+*.cov
+*.mem
+__pycache__/
+*.pyc
+.DS_Store

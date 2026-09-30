@@ -1,0 +1,63 @@
+PDCS -- COIN-OR submission package 20261001-r2
+===========================================
+
+PDCS is a Julia primal-dual solver for large-scale conic optimization with CPU
+and optional CUDA GPU implementations. Supported test cases cover second-order,
+exponential and dual exponential cones.
+
+Project home: https://github.com/ZikaiXiong/PDCS
+Submission source: https://github.com/zhenweilin/PDCS_fork/tree/coin_or
+Source commit: 966385736b25bea85f29be81bff8984f35c3b7af
+Project manager: Zikai Xiong <zikai.xiong@northwestern.edu>
+Code authors: Zhenwei Lin and Zikai Xiong (AUTHORS).
+License: Apache-2.0; see LICENSE and THIRD_PARTY_NOTICES.
+Support / bugs / features: https://github.com/ZikaiXiong/PDCS/issues
+Code of conduct: https://www.coin-or.org/code-of-conduct/
+
+Quick start
+-----------
+Install Julia 1.10 or newer, then run from this folder:
+
+    bash build.sh
+
+This installs declared Julia dependencies, runs the SOC example and the default
+CPU test suite. Set JULIA=/path/to/julia if Julia is not on PATH. Initial package
+installation needs Internet access; no research dataset is required.
+INSTALL and README.md retain the original package instructions.
+
+For GPU checks, use an allocated NVIDIA GPU and a compatible CUDA toolkit:
+
+    MODE=gpu CUDA_HOME=/path/to/cuda GPU_ARCH=sm_80 bash build.sh
+
+Use sm_90 for H100. MODE=all runs both CPU and GPU checks. The wrapper selects
+the tested CUDA.jl 5.11.3 by default; CUDA_VERSION overrides it. Native libraries
+are built from the included source. The wrapper removes LD_LIBRARY_PATH only
+from Julia processes, following the documented Quest configuration.
+Exit 0 means the requested checks passed; any failed assertion exits nonzero.
+GPU mode fails when hardware is unavailable. It does not silently skip tests.
+No linear-programming or rotated-SOC solver tests are included.
+
+Package contents
+----------------
+src/, ext/, test/, examples/: solver, extension, deterministic tests and example.
+Project.toml, INSTALL, CONTRIBUTING.md: dependencies and testing instructions.
+AUTHORS, CITATION.txt, LICENSE, LICENSES/, THIRD_PARTY_NOTICES, OWNERSHIP.txt:
+authorship, citations, license notices and the ownership-document status.
+SOURCE_PROVENANCE.json, SOURCE_MANIFEST.sha256, CHANGES_FOR_COIN_OR.txt:
+source revision, checksums and preparation changes.
+VALIDATION.md, validation/: actual results, environments and supporting logs.
+submission/: unsigned official form templates, completion notes and cover draft.
+
+The source is self-contained with respect to PDCS code and test data. Julia
+packages and the CUDA toolchain are external dependencies, not bundled binaries.
+Signed private forms, Git history, research datasets, package caches and compiled
+artifacts are not part of this release folder. See submission/README.txt for the
+existing signed-document record. No submission email has been sent by this task.
+
+Verify the package before creating build artifacts:
+
+    sha256sum -c SOURCE_MANIFEST.sha256
+
+The release label follows the companion package's 20261001-r2 naming. Actual
+validation timestamps and environments are recorded separately; this package
+does not claim COIN-OR acceptance or results from the cuPDLP-C example.

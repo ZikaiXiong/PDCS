@@ -1,0 +1,37 @@
+PDCS third-party and inherited-code notices
+==========================================
+
+Project license: Apache License 2.0. Original LICENSE is preserved unchanged.
+
+Included bridge helpers
+-----------------------
+src/pdcs_gpu/cvxpy_wrapper/py2jl.jl
+src/pdcs_gpu/cvxpy_wrapper/jl2py.py
+
+These files explicitly state that they were copied from CuClarabel.jl and link
+to the CuClarabel branch of https://github.com/oxfordcontrol/Clarabel.jl.
+Those attribution comments are preserved. That project's LICENSE.md is included
+verbatim as LICENSES/CuClarabel-Apache-2.0.txt, including its notice:
+Copyright 2022 University of Oxford Control Group.
+
+License reference inspected:
+https://github.com/oxfordcontrol/Clarabel.jl/blob/ffa325c89fa90b7e86b745fa61b1dca64daf3a06/LICENSE.md
+This is the inspected license revision, not a claim that the PDCS files were
+originally imported from that precise commit; the import revision is not recorded
+in their existing comments. The full Clarabel solver is not included or needed
+to run the default PDCS tests.
+
+External dependencies
+---------------------
+Project.toml declares Julia standard libraries and DataStructures, JuMP, Match,
+MathOptInterface, Polynomials, PythonCall, SnoopPrecompile and Statistics.
+CUDA.jl is optional. Julia's package manager obtains these dependencies under
+their own license terms; their source trees are not bundled here.
+
+GPU mode additionally requires the NVIDIA driver/toolkit and cuBLAS/cuSPARSE
+under their applicable NVIDIA terms. No NVIDIA binaries are redistributed.
+The optional Python/CVXPY integration needs its own Python, CVXPY and CuPy
+environment; that integration was not exercised by the installation tests.
+
+submission/ contains official COIN-OR form text and an unsent cover draft.
+Those administrative forms do not replace or modify any software license.

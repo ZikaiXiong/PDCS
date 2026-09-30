@@ -1,0 +1,38 @@
+       Documentation of Ownership and Licensing for New Projects
+
+###############################################################################
+
+          Contributor's Statement of Ownership and Licensing
+
+I, _________________________________, represent that:
+
+(a) the individuals and organizations listed immediately below
+    are the only owner(s) of the contribution _______________________________;
+
+
+
+
+
+
+
+
+
+
+(b) if any part of the contribution is not owned by the individuals and 
+    organizations listed in (a), that part was obtained under an open 
+    source license certified by the Open Source Initiative; and
+
+(c) all owners have agreed to license the contribution under the
+    ___________________________________, an open source license certified 
+    by the Open Source Initiative.
+
+###############################################################################
+
+                      Owner's Confirmation of Licensing
+
+I, ______________________________________, am an owner of the contribution
+________________________________, and I agree to license any portion I own
+under the terms of the _________________________________, an open source
+license certified by the Open Source Initiative.
+
+
