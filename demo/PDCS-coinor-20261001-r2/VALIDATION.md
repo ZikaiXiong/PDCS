@@ -1,9 +1,15 @@
 # PDCS validation — submission package 20261001-r2
 
-The solver, package configuration, tests and example are identical to the 74
-tracked files in `zhenweilin/PDCS_fork`, branch `coin_or`, commit
-`966385736b25bea85f29be81bff8984f35c3b7af`. This folder adds packaging and
-administrative material. `validation/SUMMARY.json` records the final checks.
+This package is based on the 74 tracked files in `zhenweilin/PDCS_fork`, branch
+`coin_or`, commit `966385736b25bea85f29be81bff8984f35c3b7af`. AUTHORS, Project.toml,
+README.md and CONTRIBUTING.md now list all four paper authors. The other 70 base
+files, including every solver, extension, test and example file, are unchanged.
+Dependency declarations are unchanged. This folder adds packaging and
+administrative material. `validation/SUMMARY.json` records the checks.
+
+The recorded solver tests preceded this author-only update. They were not rerun
+for metadata changes; file equality, dependency metadata and release checksums
+were verified again.
 
 ## Completed source and runtime checks
 

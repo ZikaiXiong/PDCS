@@ -1,3 +1,6 @@
+Historical AUTHORS at base commit 966385736b25bea85f29be81bff8984f35c3b7af.
+The current four-author list is in the root AUTHORS file.
+
 PDCS authors
 ============
 

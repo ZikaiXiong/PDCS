@@ -5,8 +5,17 @@
   "source_commit": "966385736b25bea85f29be81bff8984f35c3b7af",
   "source_integrity": {
     "checked_base_files": 74,
-    "match": true,
-    "differences": []
+    "match": false,
+    "differences": [
+      "AUTHORS",
+      "CONTRIBUTING.md",
+      "Project.toml",
+      "README.md"
+    ],
+    "matches_base_except_declared_metadata": true,
+    "unchanged_base_files": 70,
+    "runtime_files_checked": 65,
+    "runtime_source_match": true
   },
   "completed_checks_pass": true,
   "cpu_fresh_depot": {
@@ -93,5 +102,24 @@
   "excluded_solver_cases": [
     "linear programming",
     "rotated second-order cone"
-  ]
+  ],
+  "author_metadata_update": {
+    "at_utc": "2026-09-30T19:07:51.458921+00:00",
+    "authors": [
+      "Zhenwei Lin",
+      "Zikai Xiong",
+      "Dongdong Ge",
+      "Yinyu Ye"
+    ],
+    "modified_base_files": [
+      "AUTHORS",
+      "CONTRIBUTING.md",
+      "Project.toml",
+      "README.md"
+    ],
+    "runtime_source_unchanged": true,
+    "dependency_configuration_unchanged": true,
+    "solver_tests_rerun": false,
+    "reason": "Author metadata and documentation only; existing solver validation retained."
+  }
 }

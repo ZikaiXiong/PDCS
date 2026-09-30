@@ -7,14 +7,16 @@
   "source_branch": "coin_or",
   "source_commit": "966385736b25bea85f29be81bff8984f35c3b7af",
   "base_file_count": 74,
-  "base_files_preserved_byte_for_byte": true,
+  "base_files_preserved_byte_for_byte": false,
   "manager": {
     "name": "Zikai Xiong",
     "email": "zikai.xiong@northwestern.edu"
   },
   "code_authors": [
     "Zhenwei Lin",
-    "Zikai Xiong"
+    "Zikai Xiong",
+    "Dongdong Ge",
+    "Yinyu Ye"
   ],
   "reference_paper": "https://arxiv.org/abs/2505.00311",
   "project_license": "Apache-2.0",
@@ -27,5 +29,14 @@
   "validation": "validation/SUMMARY.json",
   "manifest": "SOURCE_MANIFEST.sha256",
   "signed_legal_documents_included": false,
-  "submission_sent_by_this_task": false
+  "submission_sent_by_this_task": false,
+  "unchanged_base_file_count": 70,
+  "metadata_overrides": [
+    "AUTHORS",
+    "CONTRIBUTING.md",
+    "Project.toml",
+    "README.md"
+  ],
+  "author_metadata_updated_at_utc": "2026-09-30T19:06:59.089957+00:00",
+  "author_metadata_source": "All paper authors, in paper order, at the submitting user's explicit request."
 }

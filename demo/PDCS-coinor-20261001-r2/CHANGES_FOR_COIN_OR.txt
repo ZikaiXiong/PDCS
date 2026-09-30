@@ -8,7 +8,10 @@ keeps CUDA optional, documents installation and maintainership, removes unused
 dependencies, and removes research datasets, cluster workflows, obsolete tests
 and unused solver files from the submission tree.
 
-This release folder preserves all 74 base files byte-for-byte. It adds a README
+This release folder retains all 74 base files. AUTHORS, Project.toml, README.md
+and CONTRIBUTING.md have author-metadata updates to list Zhenwei Lin, Zikai Xiong,
+Dongdong Ge and Yinyu Ye in paper order, as requested by the submitting user.
+The other 70 base files remain byte-for-byte unchanged. It adds a README
 with the standard COIN-OR filename, a CPU/GPU/all build-and-test wrapper, source
 provenance and SHA-256 manifests, actual validation evidence, the existing paper
 citation, an ownership-status record, attribution/license material for the

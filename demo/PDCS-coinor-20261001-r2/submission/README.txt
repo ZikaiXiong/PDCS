@@ -23,7 +23,7 @@ permission. Individual OCL confirmations are strongly recommended by the
 submission guidelines but not mandatory. CSRO is personal; one person's form
 does not cover another contributor. A person whose CSRO is already on file does
 not need to submit a duplicate. No filing receipt or prior CSRO record for the
-other named code author was supplied for this preparation.
+other named authors was supplied for this preparation.
 
 Review the forms and fill any remaining fields before signing or filing them.
 Only the actual signatory should sign a statement. Keep signed forms separate

@@ -1,6 +1,6 @@
 name = "PDCS"
 uuid = "00000000-0000-0000-0000-000000000001"
-authors = ["Zhenwei Lin", "Zikai Xiong"]
+authors = ["Zhenwei Lin", "Zikai Xiong", "Dongdong Ge", "Yinyu Ye"]
 version = "0.1.0"
 
 [deps]

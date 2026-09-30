@@ -1,5 +1,7 @@
 # PDCS
 
+Authors: Zhenwei Lin, Zikai Xiong, Dongdong Ge, and Yinyu Ye.
+
 PDCS is a Julia solver for large-scale conic optimization, with CPU and optional
 CUDA GPU implementations of a primal-dual algorithm. It supports second-order
 cones (SOC), exponential cones, and dual exponential cones through JuMP and

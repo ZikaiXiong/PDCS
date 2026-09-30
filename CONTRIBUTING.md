@@ -51,7 +51,8 @@ and [project management checklist](https://www.coin-or.org/management/).
 The root README, AUTHORS, INSTALL, and LICENSE provide the package overview,
 attribution, installation/testing procedure, and existing Apache 2.0 license.
 
-The code authors are Zhenwei Lin and Zikai Xiong, as listed in AUTHORS.
+The project authors are Zhenwei Lin, Zikai Xiong, Dongdong Ge, and Yinyu Ye,
+as listed in AUTHORS and in the paper citation.
 The upstream LICENSE also names Zhenwei Lin and Zikai Xiong in its copyright
 notice and licenses the code under Apache 2.0.
 The project manager is [Zikai Xiong](https://github.com/ZikaiXiong).

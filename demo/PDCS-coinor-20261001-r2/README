@@ -7,9 +7,10 @@ exponential and dual exponential cones.
 
 Project home: https://github.com/ZikaiXiong/PDCS
 Submission source: https://github.com/zhenweilin/PDCS_fork/tree/coin_or
-Source commit: 966385736b25bea85f29be81bff8984f35c3b7af
+Base source commit: 966385736b25bea85f29be81bff8984f35c3b7af
+Author metadata updated to include all four paper authors; solver code unchanged.
 Project manager: Zikai Xiong <zikai.xiong@northwestern.edu>
-Code authors: Zhenwei Lin and Zikai Xiong (AUTHORS).
+Authors: Zhenwei Lin, Zikai Xiong, Dongdong Ge, and Yinyu Ye (AUTHORS).
 License: Apache-2.0; see LICENSE and THIRD_PARTY_NOTICES.
 Support / bugs / features: https://github.com/ZikaiXiong/PDCS/issues
 Code of conduct: https://www.coin-or.org/code-of-conduct/
