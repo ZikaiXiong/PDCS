@@ -1,16 +1,18 @@
 # PDCS validation — submission package 20261001-r2
 
-This package is based on the 74 tracked files in `zhenweilin/PDCS_fork`, branch
-`coin_or`, commit `966385736b25bea85f29be81bff8984f35c3b7af`. AUTHORS, Project.toml,
-README.md and CONTRIBUTING.md now list all four paper authors. The other 70 base
-files, including every solver, extension, test and example file, are unchanged.
+This package is based on a 74-file PDCS source preparation snapshot at commit
+`966385736b25bea85f29be81bff8984f35c3b7af`. AUTHORS, Project.toml, README.md
+and CONTRIBUTING.md now list all four paper authors. The other 70 base files,
+including every solver, extension, test and example file, are unchanged.
 Dependency declarations are unchanged. This folder adds packaging and
 administrative material. `validation/SUMMARY.json` records the checks.
 
 The permanent Julia package UUID is
 `9123d4a1-5282-4e19-bc2a-6f2650421a93`. Historical validation logs and
 `validation/preparation_changes.patch` predate this assignment and therefore
-show the former placeholder UUID; they remain unmodified as test provenance.
+show the former placeholder UUID; they are retained as test provenance.
+Release-only repository and local-path labels in the historical patch and CI
+annotation metadata were normalized without changing runtime source.
 
 After assigning the permanent UUID, the release folder was copied to an
 isolated `/tmp` directory and checked with Julia 1.12.5. With

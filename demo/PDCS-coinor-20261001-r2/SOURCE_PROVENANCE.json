@@ -3,7 +3,7 @@
   "release": "20261001-r2",
   "prepared_at_utc": "2026-09-30T18:22:57.050892+00:00",
   "upstream": "https://github.com/ZikaiXiong/PDCS",
-  "source_repository": "https://github.com/zhenweilin/PDCS_fork",
+  "source_repository": "https://github.com/ZikaiXiong/PDCS",
   "source_branch": "coin_or",
   "source_commit": "966385736b25bea85f29be81bff8984f35c3b7af",
   "package_uuid": "9123d4a1-5282-4e19-bc2a-6f2650421a93",

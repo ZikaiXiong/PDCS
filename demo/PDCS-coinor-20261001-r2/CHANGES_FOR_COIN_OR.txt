@@ -1,7 +1,7 @@
 PDCS preparation changes -- package label 20261001-r2
 
-Base: zhenweilin/PDCS_fork, coin_or, commit
-966385736b25bea85f29be81bff8984f35c3b7af.
+Source preparation baseline: commit
+966385736b25bea85f29be81bff8984f35c3b7af (74 tracked files).
 
 That branch adds the documented CPU test module and optional hardware suite,
 keeps CUDA optional, documents installation and maintainership, removes unused
@@ -26,3 +26,5 @@ is tracked separately and is not presented as a completed test.
 
 The cuPDLP-C folder was used as a packaging-layout reference only. Its code,
 authors, ownership claims, solver cases and validation results were not copied.
+Private development-repository names and local path labels were removed from
+the release-facing metadata and validation artifacts.

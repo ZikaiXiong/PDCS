@@ -414,7 +414,7 @@ index 4315de8..8ed0515 100644
 +runnable example, and `test/` contains tests.
  
 -```bash
--julia --startup-file=no --project=external/PDCS_fork -e \
+-julia --startup-file=no --project=external/PDCS -e \
 -  'using Pkg; Pkg.instantiate()'
 -```
 -
@@ -423,14 +423,14 @@ index 4315de8..8ed0515 100644
 +## Support and license
  
 -```bash
--julia --startup-file=no --project=external/PDCS_fork \
--  external/PDCS_fork/benchmark/multi_period_port_pdcs_cpu.jl \
+-julia --startup-file=no --project=external/PDCS \
+-  external/PDCS/benchmark/multi_period_port_pdcs_cpu.jl \
 -  --input_folder test_data/small_scale \
 -  --time_limit 60 --workers 8
 -```
 -
 -The input defaults to `test_data/small_scale`. Per-instance logs default to
--`external/PDCS_fork/benchmark/results/small_scale/pdcs_cpu`; use
+-`external/PDCS/benchmark/results/small_scale/pdcs_cpu`; use
 -`--output_folder` to override that location. An ordinary instance failure is
 -logged and does not stop later instances, but any failure makes the batch exit
 -nonzero after all files have been attempted.
@@ -444,8 +444,8 @@ index 4315de8..8ed0515 100644
 -
 -```bash
 -JULIA_NUM_THREADS=4 julia --startup-file=no \
--  --project=external/PDCS_fork \
--  external/PDCS_fork/test/test_bulk_jumprw_small_scale.jl
+-  --project=external/PDCS \
+-  external/PDCS/test/test_bulk_jumprw_small_scale.jl
 -```
 +Contact project manager Zikai Xiong, report bugs, and request features through
 +https://github.com/ZikaiXiong/PDCS/issues. Include your Julia version, package
