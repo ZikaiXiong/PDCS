@@ -9,9 +9,8 @@ return value is one of `:gridWise`, `:blockWise`, `:warpWise`, or
 The first two blocks are scalar/simple cones in that layout, so only entries
 from the third block onward determine the largest structured-cone dimension.
 
-The rule is fitted from same-input grid/block/warp/thread measurements in
-`benchmark/R3.5/projection_benchmark`. Mixed cone families and RSOC use the robust
-block mapping. For pure SOC layouts, dimensions 1--4 favor a thread, 5--64 a
+The rule is fitted from same-input grid/block/warp/thread measurements.
+Mixed cone families and internal RSOC layouts use the robust block mapping. For pure SOC layouts, dimensions 1--4 favor a thread, 5--64 a
 warp, dimensions 65--1023 switch from block to warp near 1,000 cones, and
 dimensions at least 1024 favor a block. A single SOC switches from block to
 the grid implementation at dimension 32768. The small-SOC high-count crossover

@@ -22,7 +22,7 @@
 # Diagnostic PTX performs extra global-memory/atomic counter writes and MUST
 # NOT be used for publication runtime measurements. Use `rebuild-gpu` and the
 # normal projection API for timings; use `rebuild-profile` only with
-# benchmark/R3.5/R3.5_campaign.jl for projection-work statistics.
+# the projection profiling API for projection-work statistics.
 #
 # Override CUDA_HOME to select a toolkit independently of the system-wide
 # /usr/local/cuda symlink. ARCH=sm_90 is H100; ARCH=sm_80 is A100.
@@ -95,7 +95,7 @@ SRC3 = few_block_proj.cu
 SRC4 = sufficient_block_proj.cu
 SRC5 = utils.cu
 PROJECTION_HEADERS = bounded_soc_logit_root.cuh bounded_soc_root_step.cuh \
-	exp_proj.cu exp_root_coordinate.cuh root_profile.h soc_root_coordinate.cuh
+	exp_proj.cu exp_proj_kernel.cu exp_root_coordinate.cuh root_profile.h soc_root_coordinate.cuh
 # The default target is the production build. Profile PTX is deliberately not
 # part of `all`, so an ordinary `make` cannot accidentally enable diagnostics.
 all: $(PTX_TARGET1) $(PTX_TARGET2) $(PTX_TARGET3) $(PTX_TARGET4) $(SO_TARGET) 

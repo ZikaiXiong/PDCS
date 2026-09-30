@@ -39,7 +39,7 @@ Do not assume the default sm_90 architecture matches your device.
 
 PythonCall is installed as a package dependency for the GPU CVXPY bridge.
 CPU use does not load PythonCall or require configuring Python. The optional
-CVXPY examples require their own Python/CVXPY environment.
+CVXPY integration requires its own Python/CVXPY environment.
 
 See Project.toml for dependency UUIDs and version constraints, README.md for
 the package overview, and CONTRIBUTING.md for the test workflow.

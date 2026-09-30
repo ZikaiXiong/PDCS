@@ -20,9 +20,7 @@ that require another solver. Do not activate or modify environments from tests.
 
 The default suite covers SOC, exponential and dual exponential cones. Linear
 programming and rotated second-order cone solves are outside its scope.
-`test_bulk_cache_structure.jl` tests the cache without solving an LP. The legacy
-`test_bulk_cache.jl` remains a standalone regression and is not included in the
-default runner. Other legacy scripts may need datasets or optional dependencies.
+`test_bulk_cache_structure.jl` tests the cache without solving an LP.
 
 CPU tests must run without CUDA or external datasets. Add hardware-dependent
 regressions separately and document prerequisites in `src/pdcs_gpu/cuda/README.md`.
@@ -34,8 +32,8 @@ and MathOptInterface. For example, from the repository root:
 ```julia
 using Pkg
 Pkg.activate(temp=true)
-Pkg.develop(path=pwd())
 Pkg.add(["CUDA", "JuMP", "MathOptInterface"])
+Pkg.develop(path=pwd())
 include("test/runtests_gpu.jl")
 ```
 
@@ -75,7 +73,7 @@ After reviewing and committing the changes, a source archive can be made with:
 git archive --format=tar.gz --prefix=PDCS/ --output=PDCS-source.tar.gz HEAD
 ```
 
-`.gitattributes` excludes research datasets, cluster scripts, and local metadata
-from this archive. Test the extracted archive with the commands in INSTALL
+The submission branch contains the standalone package, without research datasets
+or cluster workflows. Test the extracted archive with the commands in INSTALL
 before sending it. An archive of HEAD contains only committed changes. This
 repository preparation does not submit the project or assert COIN-OR acceptance.

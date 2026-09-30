@@ -1,227 +1,97 @@
-# Portable CUDA projection artifacts
+# CUDA build and hardware tests
 
-This directory contains the CUDA sources used by PDCS.  The grid-wise
-projection is slightly different from the other projection kernels: its
-implementation is a shared library (`libfew_block_proj.so`) that calls
-cuBLAS, while Julia/CUDA.jl may load a different CUDA runtime.  A cuBLAS
-handle is an opaque object and must never be created by one cuBLAS library
-instance and consumed by another one.
+CPU installation does not require these artifacts. GPU native projection needs
+an NVIDIA device and driver, a CUDA toolkit with `nvcc`, GNU make, and a C++ host
+compiler supported by that toolkit.
 
-The current implementation is designed to run on both of the environments
-used for the PDCS experiments:
+## Build
 
-| Environment | GPU | Julia/CUDA.jl runtime | Native build |
-|---|---|---|---|
-| Altman | H100 80 GB | CUDA 12.4 / CUDA.jl 5.8.x | CUDA 12.4, `sm_90` |
-| Northwestern | H100 80 GB | CUDA artifact may be 13.x | CUDA 12.6, `sm_90` |
-
-The versions do not have to be identical.  The native library now creates,
-configures, queries, uses, and destroys its own cuBLAS handle.  Julia passes
-only the pointer returned by that same library.  This removes the invalid
-cross-runtime handle assumption.
-
-## What is protected
-
-The production grid-wise path has four independent safeguards:
-
-1. `PDCS_GPU.__init__` resolves the artifact directory before loading the
-   library and checks that the current ABI symbols are exported.
-2. The native library owns the cuBLAS handle and explicitly uses the handle's
-   stream for the reduction, scalar branch, and scaling operation.
-3. If the caller passes `temp === vec`, Julia substitutes a persistent,
-   non-aliasing workspace.  This prevents `cublasDnrm2` from overwriting the
-   SOC head before the projection branch reads it.
-4. The first grid-wise call performs a small SOC projection self-test. In the
-   default strict `native` mode a failure stops the run. A block-wise fallback
-   is allowed only when the caller explicitly selects `auto` or `block` mode.
-
-The self-test runs after package loading on the actual GPU.  CUDA contexts and
-native handles are deliberately not serialized in Julia's precompile cache.
-
-## Build production artifacts
-
-Build into a separate directory; do not commit generated `.ptx` or `.so`
-files.  The same command works on both machines when `CUDA_HOME` points to the
-desired toolkit:
+Run from the PDCS repository root. Set `CUDA_HOME` to your installed toolkit:
 
 ```bash
-cd /home/zhenwei/PDCS_fork
-artifact_dir=$(mktemp -d /tmp/pdcs-cuda-artifacts.XXXXXX)
+artifact_dir="$PWD/build/cuda"
 make -C src/pdcs_gpu/cuda rebuild-gpu \
-    CUDA_HOME=/usr/local/cuda-12.4 ARCH=sm_90 OUTPUT_DIR="$artifact_dir"
+  CUDA_HOME=/usr/local/cuda ARCH=sm_90 OUTPUT_DIR="$artifact_dir"
 ```
 
-On Northwestern use its loaded CUDA module, for example:
-
-```bash
-module load cuda/12.6.2-gcc-12.4.0
-artifact_dir=$(mktemp -d /tmp/pdcs-cuda-artifacts.XXXXXX)
-make -C src/pdcs_gpu/cuda rebuild-gpu \
-    CUDA_HOME="$CUDA_HOME" ARCH=sm_90 OUTPUT_DIR="$artifact_dir"
-```
-
-The output directory must contain:
+Use `ARCH=sm_90` for H100 or `ARCH=sm_80` for A100. Rebuild for the device and
+toolkit you will actually use. The build produces four PTX files and a library:
 
 ```text
-libfew_block_proj.so
 moderate_block_proj.ptx
-sufficient_block_proj.ptx
 massive_block_proj.ptx
+sufficient_block_proj.ptx
 utils.ptx
+libfew_block_proj.so
 ```
 
-Check the native ABI before running a solver:
+`make print-config` prints the compiler and build options. `make rebuild-profile`
+produces separate diagnostic kernels for the solver's projection profiling API;
+these are optional and are not used by the standard hardware tests.
+
+## Install the GPU test environment
+
+From the repository root, create an isolated Julia environment:
 
 ```bash
-nm -D "$artifact_dir/libfew_block_proj.so" | grep -E \
-  'few_block_proj|pdcs_gridwise_abi_version|create_cublas|configure_cublas|configuration_inner|destroy_cublas'
-ldd "$artifact_dir/libfew_block_proj.so" | grep -E 'cublas|cudart|cuda'
+julia --startup-file=no -e 'using Pkg; Pkg.activate("build/gpu-env"); Pkg.add(["CUDA", "JuMP", "MathOptInterface"]); Pkg.develop(path=pwd())'
 ```
 
-The four handle helper symbols and `pdcs_gridwise_abi_version` are required.
-ABI version 2 makes `few_block_proj` return a checked status. An old
-void-returning `.so` is rejected before any solver iteration.
-
-## Runtime configuration
-
-Set the artifact directory before starting Julia:
+Set runtime options before starting Julia:
 
 ```bash
-export PDCS_CUDA_PROJECTION_ARTIFACT_DIR="$artifact_dir"
+export PDCS_CUDA_PROJECTION_ARTIFACT_DIR="$PWD/build/cuda"
+export PDCS_SKIP_GPU_PRECOMPILE=1
+export PDCS_GRIDWISE_MODE=native
 export CUBLAS_WORKSPACE_CONFIG=:4096:8
-export PDCS_SKIP_GPU_PRECOMPILE=1       # useful on shared clusters
+julia --startup-file=no --project=build/gpu-env test/runtests_gpu.jl
 ```
 
-`PDCS_GRIDWISE_MODE` controls the policy:
+On a cluster, run this command inside a scheduler allocation with one GPU.
+Keep the scheduler's device visibility settings. The test fails if CUDA is not
+functional. It checks GPU arithmetic, native SOC projection and workspace
+aliasing, cuBLAS handle creation/reuse, and SOC, exponential, and dual exponential
+solves against analytic answers. Linear-programming and rotated-SOC solves are
+not included.
 
-| Value | Behavior |
-|---|---|
-| `native` (default) | Require the native path; any missing symbol, ABI mismatch, failed self-test, unsupported layout, or runtime error is fatal. |
-| `auto` | Run the ABI/self-test; explicitly permit block-wise compatibility fallback on failure. |
-| `block` | Do not load/use the grid-wise library; always use block-wise projection. |
+## Native runtime and diagnostics
 
-Whenever a grid-wise call actually takes the block-wise fallback, PDCS emits a
-warning containing the selected mode, runtime state, and failure reason.  The
-warning is emitted once per Julia process so a long solve is not flooded with
-identical messages.
+The native library creates and destroys its own cuBLAS handle, uses the handle's
+stream, and checks ABI version 2. Julia checks device ownership, storage types,
+cone layouts, and tolerances before entering native code. Calls sharing the
+native handle and workspace are serialized. The first native projection also
+runs a SOC self-test, including the case where input and workspace alias.
 
-The following optional variables are useful for diagnosis:
+The native build and CUDA.jl runtime may use different toolkit versions. The
+library records its toolkit library directory as an RPATH. Avoid putting a
+conflicting toolkit on Julia's library search path. On Quest, the hardware suite
+passed with normal Julia compiled modules and `LD_LIBRARY_PATH` removed only for
+the Julia process:
 
 ```bash
-export PDCS_GRIDWISE_SELFTEST=1       # default; set to 0 only for controlled timing
-export PDCS_GRIDWISE_STRICT=1         # fail instead of falling back in auto mode
-export PDCS_CUBLAS_REPRODUCIBLE=1     # default; uses prescribed cuBLAS math mode
+env -u LD_LIBRARY_PATH julia --startup-file=no \
+  --project=build/gpu-env test/runtests_gpu.jl
 ```
 
-Use one process per GPU.  For example, the command below binds the process to
-physical GPU 2 even when the host has four GPUs:
+The verified Quest environment was H100 80 GB, driver 610.43.02, native CUDA
+12.6.77, Julia 1.10.4, CUDA.jl 5.11.3, and CUDA.jl runtime artifact 13.2.
+The hardware suite passed 47 assertions. This is validation of that environment,
+not a claim that every CUDA/toolkit combination has been tested.
 
-```bash
-CUDA_VISIBLE_DEVICES=2 \
-PDCS_CUDA_PROJECTION_ARTIFACT_DIR="$artifact_dir" \
-PDCS_SKIP_GPU_PRECOMPILE=1 \
-CUBLAS_WORKSPACE_CONFIG=:4096:8 \
-julia --startup-file=no --project=. test/test_gridwise_lazy_handle_gpu.jl
-```
+`PDCS_GRIDWISE_MODE=native` is the default: missing artifacts, stale ABI, failed
+self-tests, or native errors stop the solve. `auto` permits a compatibility
+fallback, and `block` disables the native grid-wise path. Use `native` for the
+hardware suite; a fallback does not validate the native library.
 
-`CUDA_VISIBLE_DEVICES=2` makes that physical card appear as CUDA device 0 to
-the process.  Do not launch a second PDCS process on the same card.
-
-## Package precompile behavior
-
-PDCS has two separate checks because Julia precompilation and runtime loading
-have different constraints:
-
-* During precompile, PDCS checks artifact files and the exported native ABI
-  symbols, but does not create a CUDA context or cuBLAS handle.  If the
-  selected directory is incomplete or stale, GPU precompile is skipped with
-  an actionable warning; CPU functionality remains loadable.
-* GPU contexts, cuBLAS handles, and CUDA modules are never saved in the cache.
-  After loading on the target machine, the first grid-wise projection runs
-  the native handle/configuration/SOC alias self-test described above.
-
-To force a clean package precompile without using a GPU:
-
-```bash
-PDCS_SKIP_GPU_PRECOMPILE=1 julia --startup-file=no --project=. -e \
-  'using PDCS; println("PDCS CPU package loaded")'
-```
-
-To inspect the selected artifact and runtime state from Julia:
+Inspect runtime state after importing CUDA and PDCS:
 
 ```julia
 using CUDA
-using PDCS
 using PDCS: PDCS_GPU
-
 println(PDCS_GPU.gridWise_runtime_status())
 PDCS_GPU.check_gridWise_runtime!()
-println(PDCS_GPU.gridWise_runtime_status())
 ```
 
-The status reports the artifact directory, missing files, required/loaded ABI
-version, native/fallback state, failure reason, and effective cuBLAS
-reproducibility configuration.
-
-Before entering the native ABI, the wrapper validates Float64 storage, device
-ownership, cone ranges, dimensions, projection codes, and tolerances. Native
-calls are serialized because they share one process-owned cuBLAS handle and
-workspace. CUDA and cuBLAS failures are returned as checked status codes rather
-than only being printed to stderr.
-
-## Regression test
-
-The lightweight regression checks lazy handle creation, native symbol use,
-finite output, handle reuse, and runtime status:
-
-```bash
-CUDA_VISIBLE_DEVICES=2 \
-PDCS_SKIP_GPU_PRECOMPILE=1 \
-PDCS_CUDA_PROJECTION_ARTIFACT_DIR="$artifact_dir" \
-CUBLAS_WORKSPACE_CONFIG=:4096:8 \
-julia --startup-file=no --project=. test/test_gridwise_lazy_handle_gpu.jl
-```
-
-For a large alias regression, use an ordinary SOC of dimension 10,002 and
-compare `temp` independent of `vec` with `temp === vec`.  The two outputs must
-agree to the requested tolerance over repeated calls.  The current H100
-validation produced:
-
-```text
-gridWise lazy cuBLAS handle: 7/7 passed
-dimension=10002: independent/alias max error = 0
-native configuration: reproducible=true, atomics_mode=0, math_mode=18
-```
-
-The same test can be run with `PDCS_GRIDWISE_MODE=block` to verify the explicit
-compatibility path. Fallback must not be used to certify or time grid-wise
-projection; rebuild a matching native artifact instead.
-
-## Comparing another machine
-
-Record all of the following, not only `nvidia-smi`:
-
-```bash
-nvidia-smi
-nvcc --version
-julia --version
-julia --project=. --startup-file=no -e \
-  'using CUDA, Libdl; println(pkgversion(CUDA)); println(CUDA.runtime_version()); println(Libdl.dlpath(CUDA.CUBLAS.libcublas))'
-ldd "$artifact_dir/libfew_block_proj.so" | grep -E 'cublas|cudart|cuda'
-git rev-parse HEAD
-sha256sum "$artifact_dir/libfew_block_proj.so" "$artifact_dir"/*.ptx
-```
-
-Also record loaded modules, `LD_LIBRARY_PATH`,
-`PDCS_CUDA_PROJECTION_ARTIFACT_DIR`, `CUBLAS_WORKSPACE_CONFIG`, and the exact
-Julia project/manifest.  A CUDA toolkit used by `nvcc` is not necessarily the
-CUDA runtime selected by CUDA.jl; that distinction is precisely why native
-handle ownership is required.
-
-H100 artifacts must be rebuilt with `ARCH=sm_90`; A100 artifacts must be
-rebuilt with `ARCH=sm_80`. Do not copy a machine-specific `.so`/PTX directory
-to a different GPU architecture and treat a successful package import as a
-runtime test. Run `test/test_gridwise_robustness_gpu.jl` on the target GPU after
-each rebuild; it covers simple cones, SOC, primal/dual EXP,
-diagonal variants, repeated calls, aliasing, concurrent Julia tasks, teardown,
-and invalid-layout rejection for grid-wise and thread-wise paths.
+For a bug report, include the test output, `nvidia-smi`, `nvcc --version`,
+`julia --version`, `CUDA.versioninfo()`, `Pkg.status()`, the build command, runtime
+options, and `ldd` output for `libfew_block_proj.so`.

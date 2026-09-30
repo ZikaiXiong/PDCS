@@ -54,9 +54,6 @@ Julia's package manager installs the dependencies listed in [Project.toml](Proje
 JuMP, MathOptInterface, DataStructures, Match, Polynomials, SnoopPrecompile,
 Statistics, PythonCall, and Julia standard libraries. PythonCall is used by the
 GPU CVXPY bridge; the CPU solver does not import it. CUDA is an optional dependency.
-Research benchmarks can require additional packages (including JumpRW, SCS, and
-MosekTools), datasets, and licenses; install those in a separate benchmark environment.
-They are not required by the default tests.
 
 ## Tests and contributions
 
@@ -68,8 +65,7 @@ solve tests. GPU hardware regressions are run separately as described in the
 native GPU documentation. See [CONTRIBUTING.md](CONTRIBUTING.md) for adding tests.
 
 The `src/` and `ext/` directories contain the solver, `examples/` contains a small
-runnable example, and `test/` contains tests. Research and reproduction workflows
-remain in `benchmark/` and [REPRODUCE.md](REPRODUCE.md).
+runnable example, and `test/` contains tests.
 
 ## Support and license
 

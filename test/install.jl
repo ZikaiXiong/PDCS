@@ -1,5 +1,0 @@
-using Pkg
-Pkg.activate("pdcs_env")
-Pkg.develop(path=joinpath(@__DIR__, ".."))
-Pkg.instantiate()
-using PDCS: PDCS_CPU

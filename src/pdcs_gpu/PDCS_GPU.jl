@@ -57,12 +57,8 @@ include("./plain_multi_logger.jl")
 ## standard formulation of the optimization problem ##
 
 # def var solver and methods
-# include("./def_rpdhg.jl")
-# include("./def_rpdhg_gen.jl")
 
 # main algorithm
-# include("./rpdhg_alg_gpu.jl")
-# include("./rpdhg_alg_gpu_plot.jl")
 
 const _kernlib_ref = Ref{Ptr{Cvoid}}(C_NULL)
 const few_block_proj_ptr = Ref{Ptr{Cvoid}}(C_NULL)
@@ -258,7 +254,6 @@ include("./termination.jl")
 include("rpdhg_alg_gpu_gen_scaling.jl")
 include("./rpdhg_alg_gpu_gen.jl")
 
-# include("./rpdhg_alg_gpu_plot_gen.jl")
 
 
 include("./utils.jl")

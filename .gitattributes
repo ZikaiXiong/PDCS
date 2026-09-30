@@ -1,22 +1,6 @@
-# Keep source releases independent of local and research-only artifacts.
-/.agents export-ignore
-/.agents/** export-ignore
-/.codex export-ignore
-/.codex/** export-ignore
-/__MACOSX export-ignore
-/__MACOSX/** export-ignore
-/PDCS_CBLIB export-ignore
-/PDCS_CBLIB/** export-ignore
-/represent_data export-ignore
-/represent_data/** export-ignore
-/benchmark export-ignore
-/benchmark/** export-ignore
-/external export-ignore
-/external/** export-ignore
-/cluster_scripts export-ignore
-/cluster_scripts/** export-ignore
-/Northwest_gpu_info.md export-ignore
-/check_job_status.sh export-ignore
+# Exclude generated files from source archives.
 /Manifest.toml export-ignore
+/build export-ignore
+/build/** export-ignore
 *.so export-ignore
 *.ptx export-ignore
