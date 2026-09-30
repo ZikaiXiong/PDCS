@@ -1,172 +1,85 @@
-<p align="center">
-  <img src="./pdcs_assets/PDCS_logo.png" width="70%">
-</p>
+# PDCS
 
-PDCS is a high-performance Julia and CUDA implementation of a primal-dual algorithm for solving large-scale conic optimization problems.
+PDCS is a Julia solver for large-scale conic optimization, with CPU and optional
+CUDA GPU implementations of a primal-dual algorithm. It supports second-order
+cones (SOC), exponential cones, and dual exponential cones through JuMP and
+MathOptInterface.
 
-### Overview
+Project home: https://github.com/ZikaiXiong/PDCS
 
-This software package implements a primal-dual algorithm for solving conic optimization problems of the following form:
+Project manager: [Zikai Xiong](https://github.com/ZikaiXiong).
+Email: [zikai.xiong@northwestern.edu](mailto:zikai.xiong@northwestern.edu).
 
-$$\min_{x=(x_1,x_2),x_1\in \mathbb{R}^{n_1}, x_2\in \mathbb{R}^{n_2}} c^{\top} x\ \  \text{s.t.} Gx-h\in \mathcal{K}_d, l\leq x_1\leq u, x_2 \in \mathcal{K}_p,$$
+## Install and run
 
-where $\mathcal{K}_d$ and $\mathcal{K}_p$ are closed convex cones.
+Requires Julia 1.10 or newer. From the root of this checkout:
 
-### Features
-
-The solver supports the following cone types:
-- **Second-order cone** (SOC)
-- **Exponential cone** and **dual exponential cone**
-
-The implementation provides both CPU and GPU-accelerated solvers, with the GPU version leveraging CUDA for enhanced computational performance on large-scale problems.
-
-### Installation
-
-#### Prerequisites
-
-1. Clone the repository:
-```bash
-git clone https://github.com/ZikaiXiong/PDCS.git
-cd PDCS
+```sh
+julia --project=. -e 'using Pkg; Pkg.instantiate()'
+julia --project=. examples/soc.jl
+julia --project=. -e 'using Pkg; Pkg.test()'
 ```
 
-2. Compile the CUDA code:
-```bash
-cd src/pdcs_gpu/cuda
-make
-```
-Note: The default compute architecture is `sm_90`. Modify the Makefile if a different architecture is required.
-
-3. Return to the project root:
-```bash
-cd ../../..
-```
-
-#### Julia Package Installation
-
-Install the `PDCS` package in Julia using the following command:
+The CPU installation needs no GPU, CUDA compiler, external datasets, Python
+installation, or commercial solver license. See [INSTALL](INSTALL) for use from
+another Julia environment and optional GPU setup.
 
 ```julia
-using Pkg
-Pkg.develop(path="PDCS")
-```
-
-GPU users must also add CUDA to their active environment:
-
-```julia
-using Pkg
-Pkg.add("CUDA")
-```
-
-Note: The installation process will execute a small demonstration for precompilation purposes. Verbose logging will only occur during the initial installation.
-
-### Usage
-```julia
-julia ./test/install.jl    ## Install package
-```
-
-Importing the CPU solver does not load CUDA:
-
-```julia
+using JuMP
 using PDCS: PDCS_CPU
+
+model = Model(PDCS_CPU.Optimizer)
+set_silent(model)
+@variable(model, t)
+@constraint(model, [t, 3.0, 4.0] in SecondOrderCone())
+@objective(model, Min, t)
+optimize!(model)
+println(objective_value(model)) # approximately 5.0
 ```
 
-Load CUDA explicitly before importing the GPU solver:
+For GPU use, install and load CUDA explicitly before importing the GPU solver:
 
 ```julia
 using CUDA
 using PDCS: PDCS_GPU
-```
-
-For JuMP models, GPU sparse indices default to automatic width selection. The
-same behavior can be requested explicitly with a raw optimizer attribute:
-
-```julia
-using JuMP
-
 model = Model(PDCS_GPU.Optimizer)
-set_optimizer_attribute(model, "sparse_index_type", :auto)
 ```
 
-Automatic selection uses `Int32` when the matrix dimensions and stored-entry
-count fit safely, and `Int64` otherwise. Int64 CUSPARSE indices require CUDA 11
-or newer.
+Native GPU projection build requirements and diagnostics are documented in
+[src/pdcs_gpu/cuda/README.md](src/pdcs_gpu/cuda/README.md).
 
-Example code is provided in the `./test/` directory. The following commands demonstrate how to execute the test suites:
+## Dependencies
 
-#### CPU Solver Tests
-```julia
-julia ./test/test_exp.jl         # Test exponential cone solver (CPU)
-julia ./test/test_soc.jl         # Test second-order cone solver (CPU)
-```
+Julia's package manager installs the dependencies listed in [Project.toml](Project.toml):
+JuMP, MathOptInterface, DataStructures, Match, Polynomials, SnoopPrecompile,
+Statistics, PythonCall, and Julia standard libraries. PythonCall is used by the
+GPU CVXPY bridge; the CPU solver does not import it. CUDA is an optional dependency.
+Research benchmarks can require additional packages (including JumpRW, SCS, and
+MosekTools), datasets, and licenses; install those in a separate benchmark environment.
+They are not required by the default tests.
 
-#### GPU Solver Tests
-```julia
-julia ./test/test_exp_gpu.jl     # Test exponential cone solver (GPU)
-julia ./test/test_soc_gpu.jl     # Test second-order cone solver (GPU)
-julia --project=. ./benchmark/random_soc_projection.jl  # Benchmark random SOC projections by size/count
-```
+## Tests and contributions
 
-### Portable grid-wise CUDA projection
+`Pkg.test()` runs the portable test module in [test/runtests.jl](test/runtests.jl).
+It checks CPU imports, cone projections, SOC/exponential/dual-exponential solves
+against analytic answers, bulk-cache structure and validation, and GPU utilities
+that do not require a device. It excludes linear-programming and rotated-SOC
+solve tests. GPU hardware regressions are run separately as described in the
+native GPU documentation. See [CONTRIBUTING.md](CONTRIBUTING.md) for adding tests.
 
-Grid-wise SOC projection uses a native cuBLAS library and performs an
-environment/ABI check plus an alias-safe SOC self-test on first use.  This
-allows CUDA.jl and the native library to come from different toolkit versions
-(for example CUDA 13.x in a Julia artifact and CUDA 12.x for the compiled
-library). Build artifacts into a separate directory and set
-`PDCS_CUDA_PROJECTION_ARTIFACT_DIR` before starting Julia. The default
-`PDCS_GRIDWISE_MODE=native` policy is strict: a missing/stale ABI, failed
-self-test, unsupported native layout, or CUDA/cuBLAS runtime error stops the
-solve instead of silently changing projection strategies. Compatibility
-fallback is available only through explicit `PDCS_GRIDWISE_MODE=auto` or
-`PDCS_GRIDWISE_MODE=block` configuration.
+The `src/` and `ext/` directories contain the solver, `examples/` contains a small
+runnable example, and `test/` contains tests. Research and reproduction workflows
+remain in `benchmark/` and [REPRODUCE.md](REPRODUCE.md).
 
-The complete build, precompile, one-GPU execution, diagnostic, and regression
-instructions are in
-[`src/pdcs_gpu/cuda/README.md`](src/pdcs_gpu/cuda/README.md).
+## Support and license
 
-### PDCS CPU + JumpRW CBF Batch
+Contact project manager Zikai Xiong, report bugs, and request features through
+https://github.com/ZikaiXiong/PDCS/issues. Include your Julia version, package
+versions, a small reproducing example, and GPU details when applicable.
 
-From the JumpRW repository root, instantiate the PDCS environment once:
-
-```bash
-julia --startup-file=no --project=external/PDCS_fork -e \
-  'using Pkg; Pkg.instantiate()'
-```
-
-Then solve the small-scale CBF fixtures with `PDCS_CPU.Optimizer` through
-JumpRW's public CBF API:
-
-```bash
-julia --startup-file=no --project=external/PDCS_fork \
-  external/PDCS_fork/benchmark/multi_period_port_pdcs_cpu.jl \
-  --input_folder test_data/small_scale \
-  --time_limit 60 --workers 8
-```
-
-The input defaults to `test_data/small_scale`. Per-instance logs default to
-`external/PDCS_fork/benchmark/results/small_scale/pdcs_cpu`; use
-`--output_folder` to override that location. An ordinary instance failure is
-logged and does not stop later instances, but any failure makes the batch exit
-nonzero after all files have been attempted.
-
-The strict bulk-handoff regression discovers every `.cbf`, `.cbf.gz`, and
-`.cbf.bz2` file under `test_data/small_scale` and compares the generic
-JuMP/MOI bridge path with JumpRW's direct PDCS cache. It checks the full CSC
-matrix, constants, bounds, objective, cone ordering, iteration count, solver
-statuses, objective value, and primal/dual vectors. Run it from the JumpRW
-repository root:
-
-```bash
-JULIA_NUM_THREADS=4 julia --startup-file=no \
-  --project=external/PDCS_fork \
-  external/PDCS_fork/test/test_bulk_jumprw_small_scale.jl
-```
-
-The comparison uses a fixed PDHG iteration budget so both paths stop at the
-same deterministic checkpoint; a wall-clock limit remains only as a safety
-guard. `max_outer_iter` and `max_inner_iter` are honored as raw PDCS optimizer
-attributes.
+PDCS is distributed under the Apache License 2.0; see [LICENSE](LICENSE).
+See [AUTHORS](AUTHORS) for attribution.
+For community participation, see the [COIN-OR Code of Conduct](https://www.coin-or.org/code-of-conduct/).
 
 ### Convergence Criteria
 

@@ -1,0 +1,45 @@
+PDCS installation and tests
+===========================
+
+CPU installation (Julia 1.10 or newer)
+--------------------------------------
+Install Julia from https://julialang.org/downloads/ and make `julia` available
+on PATH. In the root of this source checkout, run:
+
+    julia --project=. -e 'using Pkg; Pkg.instantiate()'
+    julia --project=. examples/soc.jl
+    julia --project=. -e 'using Pkg; Pkg.test()'
+
+Pkg downloads the Julia dependencies automatically; the first run needs network
+access and may take time to compile packages. Tests print a Test Summary and
+exit unsuccessfully if an assertion fails. No external data is needed.
+The CPU workflow uses Julia's package manager on Linux, macOS, and Windows;
+CI is configured for all three platforms. GPU tests are separate.
+The non-stdlib dependencies are JuMP, MathOptInterface, DataStructures, Match,
+Polynomials, SnoopPrecompile, Statistics, and PythonCall. CUDA is optional.
+
+To use this checkout from another Julia environment:
+
+    using Pkg
+    Pkg.develop(path="/absolute/path/to/PDCS")
+    using PDCS: PDCS_CPU
+
+Optional GPU installation
+-------------------------
+In the Julia environment where you use PDCS, run Pkg.add("CUDA"). You need a
+compatible NVIDIA device and driver. Load CUDA before PDCS.PDCS_GPU:
+
+    using CUDA
+    using PDCS: PDCS_GPU
+
+Native grid-wise projection also requires GNU make, a CUDA toolkit with nvcc,
+and the shared libraries/PTX built from src/pdcs_gpu/cuda. Follow that directory's
+README.md to select an architecture, build artifacts, and run GPU regressions.
+Do not assume the default sm_90 architecture matches your device.
+
+PythonCall is installed as a package dependency for the GPU CVXPY bridge.
+CPU use does not load PythonCall or require configuring Python. The optional
+CVXPY examples require their own Python/CVXPY environment.
+
+See Project.toml for dependency UUIDs and version constraints, README.md for
+the package overview, and CONTRIBUTING.md for the test workflow.
