@@ -2,8 +2,3 @@ Commit author names recorded in the source history (not a replacement for AUTHOR
 
 Lin Zhenwei
 ZikaiXiong
-lzw_macbook_pro
-zhenweiPhoenix1
-zhenweiPhoenix2
-zhenwei_normthwest
-zhenweilin

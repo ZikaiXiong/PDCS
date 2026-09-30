@@ -2,6 +2,7 @@
   "project": "PDCS",
   "release": "20261001-r2",
   "recorded_at_utc": "2026-09-30T18:23:44.555314+00:00",
+  "updated_at_utc": "2026-09-30T21:10:49Z",
   "source_commit": "966385736b25bea85f29be81bff8984f35c3b7af",
   "source_integrity": {
     "checked_base_files": 74,
@@ -18,6 +19,27 @@
     "runtime_source_match": true
   },
   "completed_checks_pass": true,
+  "package_identity": {
+    "name": "PDCS",
+    "uuid": "9123d4a1-5282-4e19-bc2a-6f2650421a93",
+    "uuid_status": "permanent",
+    "uuid_format": "RFC 4122 version 4",
+    "local_general_registry_collision": false,
+    "workspace_collision": false
+  },
+  "post_uuid_cpu_validation": {
+    "recorded_at_utc": "2026-09-30T21:10:49Z",
+    "julia": "1.12.5",
+    "offline": true,
+    "used_existing_local_depot": true,
+    "downloads": 0,
+    "command": "Pkg.instantiate(); include(\"examples/soc.jl\"); Pkg.test()",
+    "resolved_package_identity": "[9123d4a1] PDCS v0.1.0",
+    "soc_objective": 4.9999999996627995,
+    "passed": 89,
+    "total": 89,
+    "exit_code": 0
+  },
   "cpu_fresh_depot": {
     "julia": "1.11.4",
     "passed": 89,
@@ -119,7 +141,8 @@
     ],
     "runtime_source_unchanged": true,
     "dependency_configuration_unchanged": true,
-    "solver_tests_rerun": false,
-    "reason": "Author metadata and documentation only; existing solver validation retained."
+    "solver_tests_rerun": true,
+    "solver_tests_rerun_at_utc": "2026-09-30T21:10:49Z",
+    "reason": "The CPU suite was rerun after the author metadata and permanent package UUID updates; existing GPU validation is retained because runtime source is unchanged."
   }
 }

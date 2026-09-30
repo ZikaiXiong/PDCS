@@ -8,7 +8,6 @@ Please find attached PDCS, a Julia primal-dual solver for large-scale conic
 optimization with CPU and optional CUDA GPU implementations.
 Project manager: Zikai Xiong (zikai.xiong@northwestern.edu).
 Project home: https://github.com/ZikaiXiong/PDCS
-Submission source: https://github.com/zhenweilin/PDCS_fork/tree/coin_or
 Reference paper: https://arxiv.org/abs/2505.00311
 
 The package includes source code, README, AUTHORS, INSTALL, Apache-2.0 license

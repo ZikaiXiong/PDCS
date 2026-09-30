@@ -9,6 +9,8 @@ MathOptInterface.
 
 Project home: https://github.com/ZikaiXiong/PDCS
 
+Julia package UUID: `9123d4a1-5282-4e19-bc2a-6f2650421a93`.
+
 Project manager: [Zikai Xiong](https://github.com/ZikaiXiong).
 Email: [zikai.xiong@northwestern.edu](mailto:zikai.xiong@northwestern.edu).
 

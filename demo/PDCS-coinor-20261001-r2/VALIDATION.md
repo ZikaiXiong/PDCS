@@ -7,16 +7,25 @@ files, including every solver, extension, test and example file, are unchanged.
 Dependency declarations are unchanged. This folder adds packaging and
 administrative material. `validation/SUMMARY.json` records the checks.
 
-The recorded solver tests preceded this author-only update. They were not rerun
-for metadata changes; file equality, dependency metadata and release checksums
-were verified again.
+The permanent Julia package UUID is
+`9123d4a1-5282-4e19-bc2a-6f2650421a93`. Historical validation logs and
+`validation/preparation_changes.patch` predate this assignment and therefore
+show the former placeholder UUID; they remain unmodified as test provenance.
+
+After assigning the permanent UUID, the release folder was copied to an
+isolated `/tmp` directory and checked with Julia 1.12.5. With
+`JULIA_PKG_OFFLINE=true` and the existing local Julia depot, `Pkg.instantiate()`,
+`examples/soc.jl`, and `Pkg.test()` completed with exit code 0. Julia identified
+the package as `[9123d4a1] PDCS v0.1.0`; the SOC objective was
+`4.9999999996627995`, and the CPU suite passed **89/89** assertions. No package
+or artifact was downloaded during this check.
 
 ## Completed source and runtime checks
 
-- A fresh clone matched the submission checkout byte-for-byte. All 41 literal
-  Julia includes, three reviewed nonliteral includes and 23 local CUDA includes
-  resolve to included files. Imported Julia packages are declared in
-  `Project.toml` or belong to Base/the package itself.
+- A fresh clone established the 74-file upstream base before the four declared
+  metadata overrides. All 41 literal Julia includes, three reviewed nonliteral
+  includes and 23 local CUDA includes resolve to included files. Imported Julia
+  packages are declared in `Project.toml` or belong to Base/the package itself.
 - On Linux with Julia 1.11.4, a fresh dependency depot and
   `JULIA_LOAD_PATH=@:@stdlib`, installation, the documented SOC example and
   `Pkg.test()` succeeded. The default CPU suite passed **89/89** assertions.

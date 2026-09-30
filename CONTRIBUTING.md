@@ -61,9 +61,9 @@ in the [Northwestern faculty directory](https://research.mccormick.northwestern.
 Report bugs and request features through https://github.com/ZikaiXiong/PDCS/issues.
 Before submitting, the maintainers still need to complete the required ownership
 statements and provide
-the proposed project description/classification. The package currently retains its
-existing placeholder UUID for compatibility; choose a permanent unique UUID
-before registering a public Julia release and update downstream environments.
+the proposed project description/classification. The permanent Julia package UUID
+is `9123d4a1-5282-4e19-bc2a-6f2650421a93`; use this UUID in registries and
+downstream environments.
 The submission guidelines identify CSRO and CSOL ownership documentation, with
 individual OCL confirmations recommended. These must be completed by the relevant
 people; they are not generated or signed by the package tests.

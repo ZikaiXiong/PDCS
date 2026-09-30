@@ -9,6 +9,7 @@ Project home: https://github.com/ZikaiXiong/PDCS
 Submission source: https://github.com/zhenweilin/PDCS_fork/tree/coin_or
 Base source commit: 966385736b25bea85f29be81bff8984f35c3b7af
 Author metadata updated to include all four paper authors; solver code unchanged.
+Julia package UUID: 9123d4a1-5282-4e19-bc2a-6f2650421a93
 Project manager: Zikai Xiong <zikai.xiong@northwestern.edu>
 Authors: Zhenwei Lin, Zikai Xiong, Dongdong Ge, and Yinyu Ye (AUTHORS).
 License: Apache-2.0; see LICENSE and THIRD_PARTY_NOTICES.
