@@ -1,0 +1,26 @@
+PDCS ownership and statement status
+==================================
+
+Project authors listed at the submitting user's request, in paper order:
+Zhenwei Lin, Zikai Xiong, Dongdong Ge and Yinyu Ye.
+The source LICENSE names Zhenwei Lin and Zikai Xiong in its copyright notice.
+Project manager: Zikai Xiong <zikai.xiong@northwestern.edu>.
+
+The provided signed DOL identifies Zhenwei Lin, Zikai Xiong, Dongdong Ge and
+Yinyu Ye as owners of the PDCS contribution, names Apache License 2.0, and bears
+Zikai Xiong's signature in the CSOL and his individual OCL sections. The provided
+CSRO names Zikai Xiong and Northwestern University and bears his signature.
+This records the contents reviewed; it does not independently determine legal
+ownership or establish that COIN-OR has received or accepted the documents.
+
+AUTHORS now lists the four paper authors, matching the names in the provided
+ownership statement. The existing source copyright notice is preserved; this
+author-list update does not execute an ownership assignment or modify a license.
+Third-party bridge code retains its separate attribution and license notice in
+THIRD_PARTY_NOTICES and LICENSES/.
+
+Only the two signed PDFs described above were available for review. No prior
+CSRO filing records for Zhenwei Lin, Dongdong Ge or Yinyu Ye were provided.
+The signed PDFs are private
+administrative material stored separately and are not copied into this package.
+Templates in submission/ are UNSIGNED. No new statement was executed or sent.

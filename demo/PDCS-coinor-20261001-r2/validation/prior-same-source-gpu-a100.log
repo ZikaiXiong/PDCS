@@ -1,0 +1,179 @@
+srun: job 7945917 queued and waiting for resources
+srun: job 7945917 has been allocated resources
+----------------------------------------
+srun job start: Wed Sep 30 10:05:13 CDT 2026
+Job ID: 7945917
+Username: rys3328
+Queue: gengpu
+Account: p53143
+----------------------------------------
+The following variables are not
+guaranteed to be the same in the
+prologue and the job run script
+----------------------------------------
+PATH (in prologue) : /gpfs/home/rys3328/.codex/packages/standalone/releases/0.155.1-x86_64-unknown-linux-musl/codex-path:/home/rys3328/.local/bin:/home/rys3328/bin:/gpfs/software/2025/pseudo-system-utils:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/usr/lpp/mmfs/bin:/hpc/usertools
+WORKDIR is: /home/rys3328
+----------------------------------------
+Wed Sep 30 10:05:19 2026       
++-----------------------------------------------------------------------------------------+
+| NVIDIA-SMI 610.43.02              KMD Version: 610.43.02     CUDA UMD Version: 13.3     |
++-----------------------------------------+------------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id          Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |
+|                                         |                        |               MIG M. |
+|=========================================+========================+======================|
+|   0  NVIDIA A100-PCIE-40GB          On  |   00000000:2F:00.0 Off |                    0 |
+| N/A   24C    P0             31W /  250W |       0MiB /  40960MiB |      0%      Default |
+|                                         |                        |             Disabled |
++-----------------------------------------+------------------------+----------------------+
+
++-----------------------------------------------------------------------------------------+
+| Processes:                                                                              |
+|  GPU   GI   CI              PID   Type   Process name                        GPU Memory |
+|        ID   ID                                                               Usage      |
+|=========================================================================================|
+|  No running processes found                                                             |
++-----------------------------------------------------------------------------------------+
+nvcc: NVIDIA (R) Cuda compiler driver
+Copyright (c) 2005-2024 NVIDIA Corporation
+Built on Thu_Sep_12_02:18:05_PDT_2024
+Cuda compilation tools, release 12.6, V12.6.77
+Build cuda_12.6.r12.6/compiler.34841621_0
+qgpu0403
+SLURM_JOB_ID=7945917
+make: Entering directory '/gpfs/home/rys3328/PDCS_COIN_OR/benchmark/coin_or_gpu_validation/clean-source/src/pdcs_gpu/cuda'
+mkdir -p /gpfs/home/rys3328/PDCS_COIN_OR/benchmark/coin_or_gpu_validation/artifacts-7945917
+/gpfs/software/2025/spack/opt/spack/linux-rhel8-x86_64/gcc-12.4.0/cuda-12.6.2-6ifyk6gdhg6by2ewvmwtv42epug7y4mx/bin/nvcc -arch=sm_80 -O3  -DPDCS_ENABLE_SHUFFLE_BLOCK_REDUCTION=0 -DPDCS_ENABLE_EXPONENT_EXPANSION=0 -DPDCS_SOC_COORDINATE_MODE=0 -DPDCS_EXP_COORDINATE_MODE=0 -DPDCS_ENABLE_EXP_RECIPROCAL_PAIR=0 -DPDCS_ENABLE_SAFEGUARDED_NEWTON=1 -DPDCS_SOC_BOUNDED_NEWTON_STEPS=8 -DPDCS_ENABLE_FUSED_SOC_ORACLE=1 -DPDCS_ENABLE_FUSED_SOC_INITIAL_TESTS=1 -DPDCS_ENABLE_GRID_SOC_FASTPATH=1 -DPDCS_ENABLE_BOUNDED_SOC_ROOT=1 -DPDCS_ENABLE_BOUNDED_SOC_ILLINOIS=0 -DPDCS_ENABLE_BOUNDED_SOC_LOGIT_ROOT=1 -DPDCS_SOC_LOGIT_STEPS=48 -DPDCS_SOC_LOGIT_MIN_DIMENSION=16384 -DPDCS_ENABLE_GRID_SOC_LOGIT_ROOT=0 -DPDCS_ENABLE_THREAD_SOC_LOGIT_ROOT=0 -DPDCS_ENABLE_ADAPTIVE_LOGIT_NEWTON=1 -DPDCS_LOGIT_REQUIRE_RESIDUAL_WITH_CORRECTION=1 -DPDCS_ENABLE_SOC_LOGIT_ILLINOIS=0 -DPDCS_ENABLE_BOUNDED_SOC_SMALL_STEP_EXIT=1 -DPDCS_ENABLE_EXP_REUSE_ENDPOINT_VALUES=0 -DPDCS_ENABLE_STANDARD_EXP_REUSE_WARM_ORACLE=1 -DPDCS_ENABLE_DIAGONAL_EXP_REUSE_WARM_ORACLE=1 -DPDCS_ENABLE_STANDARD_EXP_RECIPROCAL_PAIR=0 -DPDCS_ENABLE_DIAGONAL_EXP_RECIPROCAL_PAIR=0 -DPDCS_STANDARD_EXP_COORDINATE_MODE=0 -DPDCS_DIAGONAL_EXP_COORDINATE_MODE=0 -ptx moderate_block_proj.cu -o /gpfs/home/rys3328/PDCS_COIN_OR/benchmark/coin_or_gpu_validation/artifacts-7945917/moderate_block_proj.ptx
+/gpfs/software/2025/spack/opt/spack/linux-rhel8-x86_64/gcc-12.4.0/cuda-12.6.2-6ifyk6gdhg6by2ewvmwtv42epug7y4mx/bin/nvcc -arch=sm_80 -O3  -DPDCS_ENABLE_SHUFFLE_BLOCK_REDUCTION=0 -DPDCS_ENABLE_EXPONENT_EXPANSION=0 -DPDCS_SOC_COORDINATE_MODE=0 -DPDCS_EXP_COORDINATE_MODE=0 -DPDCS_ENABLE_EXP_RECIPROCAL_PAIR=0 -DPDCS_ENABLE_SAFEGUARDED_NEWTON=1 -DPDCS_SOC_BOUNDED_NEWTON_STEPS=8 -DPDCS_ENABLE_FUSED_SOC_ORACLE=1 -DPDCS_ENABLE_FUSED_SOC_INITIAL_TESTS=1 -DPDCS_ENABLE_GRID_SOC_FASTPATH=1 -DPDCS_ENABLE_BOUNDED_SOC_ROOT=1 -DPDCS_ENABLE_BOUNDED_SOC_ILLINOIS=0 -DPDCS_ENABLE_BOUNDED_SOC_LOGIT_ROOT=1 -DPDCS_SOC_LOGIT_STEPS=48 -DPDCS_SOC_LOGIT_MIN_DIMENSION=16384 -DPDCS_ENABLE_GRID_SOC_LOGIT_ROOT=0 -DPDCS_ENABLE_THREAD_SOC_LOGIT_ROOT=0 -DPDCS_ENABLE_ADAPTIVE_LOGIT_NEWTON=1 -DPDCS_LOGIT_REQUIRE_RESIDUAL_WITH_CORRECTION=1 -DPDCS_ENABLE_SOC_LOGIT_ILLINOIS=0 -DPDCS_ENABLE_BOUNDED_SOC_SMALL_STEP_EXIT=1 -DPDCS_ENABLE_EXP_REUSE_ENDPOINT_VALUES=0 -DPDCS_ENABLE_STANDARD_EXP_REUSE_WARM_ORACLE=1 -DPDCS_ENABLE_DIAGONAL_EXP_REUSE_WARM_ORACLE=1 -DPDCS_ENABLE_STANDARD_EXP_RECIPROCAL_PAIR=0 -DPDCS_ENABLE_DIAGONAL_EXP_RECIPROCAL_PAIR=0 -DPDCS_STANDARD_EXP_COORDINATE_MODE=0 -DPDCS_DIAGONAL_EXP_COORDINATE_MODE=0 -ptx massive_block_proj.cu -o /gpfs/home/rys3328/PDCS_COIN_OR/benchmark/coin_or_gpu_validation/artifacts-7945917/massive_block_proj.ptx
+/gpfs/software/2025/spack/opt/spack/linux-rhel8-x86_64/gcc-12.4.0/cuda-12.6.2-6ifyk6gdhg6by2ewvmwtv42epug7y4mx/bin/nvcc -arch=sm_80 -O3  -DPDCS_ENABLE_SHUFFLE_BLOCK_REDUCTION=0 -DPDCS_ENABLE_EXPONENT_EXPANSION=0 -DPDCS_SOC_COORDINATE_MODE=0 -DPDCS_EXP_COORDINATE_MODE=0 -DPDCS_ENABLE_EXP_RECIPROCAL_PAIR=0 -DPDCS_ENABLE_SAFEGUARDED_NEWTON=1 -DPDCS_SOC_BOUNDED_NEWTON_STEPS=8 -DPDCS_ENABLE_FUSED_SOC_ORACLE=1 -DPDCS_ENABLE_FUSED_SOC_INITIAL_TESTS=1 -DPDCS_ENABLE_GRID_SOC_FASTPATH=1 -DPDCS_ENABLE_BOUNDED_SOC_ROOT=1 -DPDCS_ENABLE_BOUNDED_SOC_ILLINOIS=0 -DPDCS_ENABLE_BOUNDED_SOC_LOGIT_ROOT=1 -DPDCS_SOC_LOGIT_STEPS=48 -DPDCS_SOC_LOGIT_MIN_DIMENSION=16384 -DPDCS_ENABLE_GRID_SOC_LOGIT_ROOT=0 -DPDCS_ENABLE_THREAD_SOC_LOGIT_ROOT=0 -DPDCS_ENABLE_ADAPTIVE_LOGIT_NEWTON=1 -DPDCS_LOGIT_REQUIRE_RESIDUAL_WITH_CORRECTION=1 -DPDCS_ENABLE_SOC_LOGIT_ILLINOIS=0 -DPDCS_ENABLE_BOUNDED_SOC_SMALL_STEP_EXIT=1 -DPDCS_ENABLE_EXP_REUSE_ENDPOINT_VALUES=0 -DPDCS_ENABLE_STANDARD_EXP_REUSE_WARM_ORACLE=1 -DPDCS_ENABLE_DIAGONAL_EXP_REUSE_WARM_ORACLE=1 -DPDCS_ENABLE_STANDARD_EXP_RECIPROCAL_PAIR=0 -DPDCS_ENABLE_DIAGONAL_EXP_RECIPROCAL_PAIR=0 -DPDCS_STANDARD_EXP_COORDINATE_MODE=0 -DPDCS_DIAGONAL_EXP_COORDINATE_MODE=0 -ptx sufficient_block_proj.cu -o /gpfs/home/rys3328/PDCS_COIN_OR/benchmark/coin_or_gpu_validation/artifacts-7945917/sufficient_block_proj.ptx
+/gpfs/software/2025/spack/opt/spack/linux-rhel8-x86_64/gcc-12.4.0/cuda-12.6.2-6ifyk6gdhg6by2ewvmwtv42epug7y4mx/bin/nvcc -arch=sm_80 -O3  -ptx utils.cu -o /gpfs/home/rys3328/PDCS_COIN_OR/benchmark/coin_or_gpu_validation/artifacts-7945917/utils.ptx
+/gpfs/software/2025/spack/opt/spack/linux-rhel8-x86_64/gcc-12.4.0/cuda-12.6.2-6ifyk6gdhg6by2ewvmwtv42epug7y4mx/bin/nvcc -arch=sm_80 -O3 -DPDCS_ENABLE_SHUFFLE_BLOCK_REDUCTION=0 -DPDCS_ENABLE_EXPONENT_EXPANSION=0 -DPDCS_SOC_COORDINATE_MODE=0 -DPDCS_EXP_COORDINATE_MODE=0 -DPDCS_ENABLE_EXP_RECIPROCAL_PAIR=0 -DPDCS_ENABLE_SAFEGUARDED_NEWTON=1 -DPDCS_SOC_BOUNDED_NEWTON_STEPS=8 -DPDCS_ENABLE_FUSED_SOC_ORACLE=1 -DPDCS_ENABLE_FUSED_SOC_INITIAL_TESTS=1 -DPDCS_ENABLE_GRID_SOC_FASTPATH=1 -DPDCS_ENABLE_BOUNDED_SOC_ROOT=1 -DPDCS_ENABLE_BOUNDED_SOC_ILLINOIS=0 -DPDCS_ENABLE_BOUNDED_SOC_LOGIT_ROOT=1 -DPDCS_SOC_LOGIT_STEPS=48 -DPDCS_SOC_LOGIT_MIN_DIMENSION=16384 -DPDCS_ENABLE_GRID_SOC_LOGIT_ROOT=0 -DPDCS_ENABLE_THREAD_SOC_LOGIT_ROOT=0 -DPDCS_ENABLE_ADAPTIVE_LOGIT_NEWTON=1 -DPDCS_LOGIT_REQUIRE_RESIDUAL_WITH_CORRECTION=1 -DPDCS_ENABLE_SOC_LOGIT_ILLINOIS=0 -DPDCS_ENABLE_BOUNDED_SOC_SMALL_STEP_EXIT=1 -DPDCS_ENABLE_EXP_REUSE_ENDPOINT_VALUES=0 -DPDCS_ENABLE_STANDARD_EXP_REUSE_WARM_ORACLE=1 -DPDCS_ENABLE_DIAGONAL_EXP_REUSE_WARM_ORACLE=1 -DPDCS_ENABLE_STANDARD_EXP_RECIPROCAL_PAIR=0 -DPDCS_ENABLE_DIAGONAL_EXP_RECIPROCAL_PAIR=0 -DPDCS_STANDARD_EXP_COORDINATE_MODE=0 -DPDCS_DIAGONAL_EXP_COORDINATE_MODE=0 -Xcompiler -fPIC -shared -Xlinker -rpath -Xlinker /gpfs/software/2025/spack/opt/spack/linux-rhel8-x86_64/gcc-12.4.0/cuda-12.6.2-6ifyk6gdhg6by2ewvmwtv42epug7y4mx/lib64 few_block_proj.cu -o /gpfs/home/rys3328/PDCS_COIN_OR/benchmark/coin_or_gpu_validation/artifacts-7945917/libfew_block_proj.so -lcublas
+make: Leaving directory '/gpfs/home/rys3328/PDCS_COIN_OR/benchmark/coin_or_gpu_validation/clean-source/src/pdcs_gpu/cuda'
+┌ Warning: Module CUDA with build ID ffffffff-ffff-ffff-001e-5a5f3bd44ce2 is missing from the cache.
+│ This may mean CUDA [052768ef-5323-5732-b1bb-66c8b64840ba] does not support precompilation but is imported by a module that does.
+└ @ Base loading.jl:1948
+┌ Error: Error during loading of extension AtomixCUDAExt of Atomix, use `Base.retry_load_extensions()` to retry.
+│   exception =
+│    1-element ExceptionStack:
+│    Declaring __precompile__(false) is not allowed in files that are being precompiled.
+│    Stacktrace:
+│      [1] _require(pkg::Base.PkgId, env::Nothing)
+│        @ Base ./loading.jl:1999
+│      [2] __require_prelocked(uuidkey::Base.PkgId, env::Nothing)
+│        @ Base ./loading.jl:1812
+│      [3] #invoke_in_world#3
+│        @ ./essentials.jl:926 [inlined]
+│      [4] invoke_in_world
+│        @ ./essentials.jl:923 [inlined]
+│      [5] _require_prelocked
+│        @ ./loading.jl:1803 [inlined]
+│      [6] _require_prelocked
+│        @ ./loading.jl:1802 [inlined]
+│      [7] run_extension_callbacks(extid::Base.ExtensionId)
+│        @ Base ./loading.jl:1295
+│      [8] run_extension_callbacks(pkgid::Base.PkgId)
+│        @ Base ./loading.jl:1330
+│      [9] run_package_callbacks(modkey::Base.PkgId)
+│        @ Base ./loading.jl:1164
+│     [10] _tryrequire_from_serialized(modkey::Base.PkgId, path::String, ocachepath::String, sourcepath::String, depmods::Vector{Any})
+│        @ Base ./loading.jl:1487
+│     [11] _require_search_from_serialized(pkg::Base.PkgId, sourcepath::String, build_id::UInt128)
+│        @ Base ./loading.jl:1574
+│     [12] _require(pkg::Base.PkgId, env::String)
+│        @ Base ./loading.jl:1938
+│     [13] __require_prelocked(uuidkey::Base.PkgId, env::String)
+│        @ Base ./loading.jl:1812
+│     [14] #invoke_in_world#3
+│        @ ./essentials.jl:926 [inlined]
+│     [15] invoke_in_world
+│        @ ./essentials.jl:923 [inlined]
+│     [16] _require_prelocked(uuidkey::Base.PkgId, env::String)
+│        @ Base ./loading.jl:1803
+│     [17] macro expansion
+│        @ ./loading.jl:1790 [inlined]
+│     [18] macro expansion
+│        @ ./lock.jl:267 [inlined]
+│     [19] __require(into::Module, mod::Symbol)
+│        @ Base ./loading.jl:1753
+│     [20] #invoke_in_world#3
+│        @ ./essentials.jl:926 [inlined]
+│     [21] invoke_in_world
+│        @ ./essentials.jl:923 [inlined]
+│     [22] require(into::Module, mod::Symbol)
+│        @ Base ./loading.jl:1746
+│     [23] include
+│        @ ./Base.jl:495 [inlined]
+│     [24] include_package_for_output(pkg::Base.PkgId, input::String, depot_path::Vector{String}, dl_load_path::Vector{String}, load_path::Vector{String}, concrete_deps::Vector{Pair{Base.PkgId, UInt128}}, source::String)
+│        @ Base ./loading.jl:2222
+│     [25] top-level scope
+│        @ stdin:3
+│     [26] eval
+│        @ ./boot.jl:385 [inlined]
+│     [27] include_string(mapexpr::typeof(identity), mod::Module, code::String, filename::String)
+│        @ Base ./loading.jl:2076
+│     [28] include_string
+│        @ ./loading.jl:2086 [inlined]
+│     [29] exec_options(opts::Base.JLOptions)
+│        @ Base ./client.jl:316
+│     [30] _start()
+│        @ Base ./client.jl:552
+└ @ Base loading.jl:1301
+[ Info: ============precompile PDCS_CPU============
+[ Info: ============precompile PDCS_CPU done============
+[ Info: ============ PDCS_GPU GPU precompile skipped ============
+CUDA toolchain: 
+- runtime 13.2, artifact installation
+- driver 610.43.2 for 13.3
+- compiler 13.3, artifact installation
+
+CUDA libraries: 
+- CUBLAS: 13.4.0
+- CURAND: 10.4.2
+- CUFFT: 12.2.0
+- CUSOLVER: 12.2.0
+- CUSPARSE: 12.7.10
+- CUPTI: 2026.1.1 (API 13.2.1)
+- NVML: 13.0.0+610.43.2
+
+Julia packages: 
+- CUDA: 5.11.3
+- GPUArrays: 11.5.14
+- GPUCompiler: 1.17.1
+- KernelAbstractions: 0.9.42
+- CUDA_Driver_jll: 13.3.4+0
+- CUDA_Compiler_jll: 0.4.4+1
+- CUDA_Runtime_jll: 0.21.0+1
+
+Toolchain:
+- Julia: 1.10.4
+- LLVM: 15.0.7
+
+1 device:
+  0: NVIDIA A100-PCIE-40GB (sm_80, 39.101 GiB / 40.000 GiB available)
+[ Info: initial nrm1G: 1.0, initial nrmInfG: 1.0
+[ Info: initial nrm1c: 1.0
+[ Info: initial nrm1h: 7.0
+[ Info: initial nrmInfc: 1.0
+[ Info: iter:0 rel_p_res(inf):5.000e-01 rel_d_res(inf):5.000e-01 primal_obj:0.000e+00 dual_obj:0.000e+00 rel_pd_gap:0.000e+00 time:0.00 restart_used:0
+[ Info: Start power method for estimating the largest eigenvalue of the matrix.
+[ Info: Fixed step enabled: eta=0.9, estimated_norm_G=1.0, power_method_flag=0
+GPU_SOLVE cone=SOC objective=5.0 expected=5.0
+[ Info: initial nrm1G: 1.0, initial nrmInfG: 1.0
+[ Info: initial nrm1c: 1.0
+[ Info: initial nrm1h: 2.0
+[ Info: initial nrmInfc: 1.0
+[ Info: iter:0 rel_p_res(inf):4.267e-01 rel_d_res(inf):5.000e-01 primal_obj:0.000e+00 dual_obj:0.000e+00 rel_pd_gap:0.000e+00 time:0.00 restart_used:0
+[ Info: Start power method for estimating the largest eigenvalue of the matrix.
+[ Info: Fixed step enabled: eta=0.9, estimated_norm_G=1.0, power_method_flag=0
+GPU_SOLVE cone=Exponential objective=2.71828182846594 expected=2.718281828459045
+[ Info: initial nrm1G: 1.0, initial nrmInfG: 1.0
+[ Info: initial nrm1c: 1.0
+[ Info: initial nrm1h: 1.0
+[ Info: initial nrmInfc: 1.0
+[ Info: iter:0 rel_p_res(inf):1.472e-01 rel_d_res(inf):5.000e-01 primal_obj:0.000e+00 dual_obj:0.000e+00 rel_pd_gap:0.000e+00 time:0.00 restart_used:0
+[ Info: Start power method for estimating the largest eigenvalue of the matrix.
+[ Info: Fixed step enabled: eta=0.9, estimated_norm_G=1.0, power_method_flag=0
+GPU_SOLVE cone=Dual exponential objective=0.3678794411698833 expected=0.36787944117144233
+GPU_NATIVE_RUNTIME=(mode = "native", artifact_dir = "/gpfs/home/rys3328/PDCS_COIN_OR/benchmark/coin_or_gpu_validation/artifacts-7945917", missing_artifacts = String[], native_enabled = true, state = :passed, failure = nothing, abi_version = 2, required_abi_version = 2, configuration = (reproducible = true, workspace_config = ":4096:8", atomics_mode = 0, math_mode = 18))
+Test Summary:     | Pass  Total   Time
+PDCS GPU hardware |   47     47  39.5s

@@ -1,0 +1,117 @@
+Precompiling CUDA, JuMP...
+   5183.1 ms  ✓ Unicode
+   6200.7 ms  ✓ LLVMLoopInfo
+   2438.8 ms  ✓ OrderedCollections
+   2313.5 ms  ✓ Preferences
+    680.3 ms  ✓ Serialization
+    670.9 ms  ✓ AbstractFFTs
+    455.9 ms  ✓ LaTeXStrings
+    474.7 ms  ✓ OpenLibm_jll
+    389.6 ms  ✓ Reexport
+    453.7 ms  ✓ Zlib_jll
+    678.8 ms  ✓ DocStringExtensions
+    621.6 ms  ✓ Statistics
+    514.2 ms  ✓ ExprTools
+   1254.5 ms  ✓ IrrationalConstants
+    527.0 ms  ✓ Adapt
+    385.3 ms  ✓ IteratorInterfaceExtensions
+  13020.1 ms  ✓ StyledStrings
+   6284.6 ms  ✓ UnsafeAtomics
+    445.7 ms  ✓ DataAPI
+    573.4 ms  ✓ CompilerSupportLibraries_jll
+    504.5 ms  ✓ SuiteSparse_jll
+   1329.0 ms  ✓ Crayons
+   1336.5 ms  ✓ InteractiveUtils
+   2430.3 ms  ✓ MacroTools
+    767.6 ms  ✓ CEnum
+   1025.0 ms  ✓ RandomNumbers
+    752.7 ms  ✓ StaticArraysCore
+   1630.5 ms  ✓ CUDA_Runtime_Discovery
+    457.7 ms  ✓ HashArrayMappedTries
+    687.2 ms  ✓ TranscodingStreams
+    589.9 ms  ✓ Requires
+    719.3 ms  ✓ BFloat16s
+    505.7 ms  ✓ Scratch
+    960.9 ms  ✓ StructUtils
+    375.7 ms  ✓ DataValueInterfaces
+    540.3 ms  ✓ PrecompileTools
+    564.5 ms  ✓ JLLWrappers
+    526.4 ms  ✓ NaNMath
+    688.9 ms  ✓ LogExpFunctions
+   1084.7 ms  ✓ LazyArtifacts
+    547.0 ms  ✓ GPUArraysCore
+    420.6 ms  ✓ TableTraits
+    591.4 ms  ✓ Atomix
+   3572.3 ms  ✓ SparseArrays
+   3872.8 ms  ✓ Test
+    543.7 ms  ✓ CommonSubexpressions
+    992.2 ms  ✓ Random123
+    466.4 ms  ✓ DiffResults
+    510.3 ms  ✓ ScopedValues
+    672.7 ms  ✓ CodecZlib
+    650.4 ms  ✓ StructUtils → StructUtilsStaticArraysCoreExt
+   7973.2 ms  ✓ StaticArrays
+  10571.4 ms  ✓ StringManipulation
+ 105261.3 ms  ✓ REPL
+   6792.3 ms  ✓ NVTX_jll
+   3333.9 ms  ✓ CUDA_Driver_jll
+    721.5 ms  ✓ LibTracyClient_jll
+    615.9 ms  ✓ JuliaNVTXCallbacks_jll
+    686.7 ms  ✓ LMDB_jll
+    631.8 ms  ✓ tree_sitter_spirv_jll
+    617.4 ms  ✓ Bzip2_jll
+    671.5 ms  ✓ NVPTX_LLVM_Backend_jll
+  90172.4 ms  ✓ Parsers
+    621.5 ms  ✓ tree_sitter_llvm_jll
+    655.7 ms  ✓ tree_sitter_gcn_jll
+    641.6 ms  ✓ demumble_jll
+    622.9 ms  ✓ tree_sitter_ptx_jll
+    702.3 ms  ✓ OpenSpecFun_jll
+   1592.0 ms  ✓ Tables
+   3008.8 ms  ✓ LLVMExtra_jll
+    876.5 ms  ✓ Statistics → SparseArraysExt
+    686.2 ms  ✓ Adapt → AdaptSparseArraysExt
+   1488.6 ms  ✓ AbstractFFTs → AbstractFFTsTestExt
+    965.4 ms  ✓ StaticArrays → StaticArraysStatisticsExt
+    696.5 ms  ✓ Adapt → AdaptStaticArraysExt
+   5849.5 ms  ✓ MutableArithmetics
+  11940.4 ms  ✓ Pkg → REPLExt
+   9012.0 ms  ✓ CUDA_Compiler_jll
+   1396.1 ms  ✓ Tracy
+   1208.7 ms  ✓ NVTX
+    762.7 ms  ✓ CodecBzip2
+   1417.0 ms  ✓ LMDB
+   3022.3 ms  ✓ SpecialFunctions
+    548.1 ms  ✓ StructUtils → StructUtilsTablesExt
+  12655.4 ms  ✓ JSON
+   9873.1 ms  ✓ LLVM
+   3812.6 ms  ✓ KernelAbstractions
+  18177.6 ms  ✓ CUDA_Runtime_jll
+  41255.5 ms  ✓ PrettyTables
+   1107.8 ms  ✓ CompilerCaching
+    757.4 ms  ✓ DiffRules
+   1566.0 ms  ✓ GPUToolbox
+   1321.3 ms  ✓ LLVM → BFloat16sExt
+   1524.7 ms  ✓ KernelAbstractions → SparseArraysExt
+   2068.1 ms  ✓ UnsafeAtomics → UnsafeAtomicsLLVM
+    830.7 ms  ✓ KernelAbstractions → LinearAlgebraExt
+   3672.9 ms  ✓ ForwardDiff
+   5156.5 ms  ✓ GPUArrays
+    976.2 ms  ✓ ForwardDiff → ForwardDiffStaticArraysExt
+  35529.8 ms  ✓ GPUCompiler
+  31844.3 ms  ✓ CUDACore
+  73424.5 ms  ✓ MathOptInterface
+  18406.5 ms  ✓ CUDACore → SpecialFunctionsExt
+   8140.6 ms  ✓ NVML
+   8533.0 ms  ✓ CUPTI
+   6225.9 ms  ✓ cuRAND
+   5743.6 ms  ✓ cuFFT
+  10734.6 ms  ✓ cuSPARSE
+  15318.1 ms  ✓ cuBLAS
+  27805.0 ms  ✓ JuMP
+  25810.9 ms  ✓ CUDATools
+  15066.3 ms  ✓ cuSOLVER
+   6009.3 ms  ✓ CUDA
+   5559.8 ms  ✓ Atomix → AtomixCUDAExt
+  114 dependencies successfully precompiled in 388 seconds. 21 already precompiled.
+GPU_DEPENDENCY_PRECOMPILE_DONE

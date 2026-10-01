@@ -1,76 +1,116 @@
+# PDCS
+
 <p align="center">
-  <img src="./pdcs_assets/PDCS_logo.png" width="70%">
+  <img src="./pdcs_assets/PDCS_logo.png" alt="PDCS: Primal Dual Conic Programming Solver" width="70%">
 </p>
 
-PDCS is a high-performance Julia and CUDA implementation of a primal-dual algorithm for solving large-scale conic optimization problems.
+[![CPU tests](https://github.com/ZikaiXiong/PDCS/actions/workflows/ci.yml/badge.svg)](https://github.com/ZikaiXiong/PDCS/actions/workflows/ci.yml)
 
-### Overview
+Authors: Zhenwei Lin, Zikai Xiong, Dongdong Ge, and Yinyu Ye.
 
-This software package implements a primal-dual algorithm for solving conic optimization problems of the following form:
+PDCS is a Julia solver for large-scale conic optimization, with CPU and optional
+CUDA GPU implementations of a primal-dual algorithm. It supports second-order
+cones (SOC), exponential cones, and dual exponential cones through JuMP and
+MathOptInterface.
 
-$$\min_{x=(x_1,x_2),x_1\in \mathbb{R}^{n_1}, x_2\in \mathbb{R}^{n_2}} c^{\top} x\ \  \text{s.t.} Gx-h\in \mathcal{K}_d, l\leq x_1\leq u, x_2 \in \mathcal{K}_p,$$
+Project home: https://github.com/ZikaiXiong/PDCS
 
-where $\mathcal{K}_d$ and $\mathcal{K}_p$ are closed convex cones.
+Julia package UUID: `9123d4a1-5282-4e19-bc2a-6f2650421a93`.
 
-### Features
+Current project version: `0.1.1`. See [RELEASE.md](RELEASE.md) for the version
+and tag procedure.
 
-The solver supports the following cone types:
-- **Second-order cone** (SOC) and **rotated second-order cone** (RSOC)
-- **Exponential cone** and **dual exponential cone**
+Project manager: [Zikai Xiong](https://github.com/ZikaiXiong).
+Email: [zikai.xiong@northwestern.edu](mailto:zikai.xiong@northwestern.edu).
 
-The implementation provides both CPU and GPU-accelerated solvers, with the GPU version leveraging CUDA for enhanced computational performance on large-scale problems.
+## Install and run
 
-### Installation
+Requires Julia 1.10 or newer. From the root of this checkout, the recommended
+end-to-end CPU command is:
 
-#### Prerequisites
-
-1. Clone the repository:
-```bash
-git clone https://github.com/ZikaiXiong/PDCS.git
-cd PDCS
+```sh
+MODE=cpu bash build.sh
 ```
 
-2. Compile the CUDA code:
-```bash
-cd src/pdcs_gpu/cuda
-make
-```
-Note: The default compute architecture is `sm_90`. Modify the Makefile if a different architecture is required.
+It instantiates the environment, runs the small SOC example, and executes the
+portable test suite. The equivalent individual commands are:
 
-3. Return to the project root:
-```bash
-cd ../../..
+```sh
+julia --project=. -e 'using Pkg; Pkg.instantiate()'
+julia --project=. examples/soc.jl
+julia --project=. -e 'using Pkg; Pkg.test()'
 ```
 
-#### Julia Package Installation
-
-Install the `PDCS` package in Julia using the following command:
+The CPU installation needs no GPU, CUDA compiler, external datasets, Python
+installation, or commercial solver license. See [INSTALL](INSTALL) for use from
+another Julia environment and optional GPU setup.
 
 ```julia
-using Pkg
-Pkg.develop(path="PDCS")
+using JuMP
+using PDCS: PDCS_CPU
+
+model = Model(PDCS_CPU.Optimizer)
+set_silent(model)
+@variable(model, t)
+@constraint(model, [t, 3.0, 4.0] in SecondOrderCone())
+@objective(model, Min, t)
+optimize!(model)
+println(objective_value(model)) # approximately 5.0
 ```
 
-Note: The installation process will execute a small demonstration for precompilation purposes. Verbose logging will only occur during the initial installation.
+For GPU use, install and load CUDA explicitly before importing the GPU solver:
 
-### Usage
 ```julia
-julia ./test/install.jl    ## Install package
+using CUDA
+using PDCS: PDCS_GPU
+model = Model(PDCS_GPU.Optimizer)
 ```
 
-Example code is provided in the `./test/` directory. The following commands demonstrate how to execute the test suites:
+The complete GPU build and hardware test can be run with:
 
-#### CPU Solver Tests
-```julia
-julia ./test/test_exp.jl         # Test exponential cone solver (CPU)
-julia ./test/test_soc.jl         # Test second-order cone solver (CPU)
+```sh
+CUDA_HOME=/usr/local/cuda GPU_ARCH=sm_80 MODE=gpu bash build.sh
 ```
 
-#### GPU Solver Tests
-```julia
-julia ./test/test_exp_gpu.jl     # Test exponential cone solver (GPU)
-julia ./test/test_soc_gpu.jl     # Test second-order cone solver (GPU)
-```
+Select `GPU_ARCH` for the allocated device; `sm_80` is appropriate for A100 and
+`sm_90` for H100. See [INSTALL](INSTALL) for the full prerequisites.
+
+Native GPU projection build requirements and diagnostics are documented in
+[src/pdcs_gpu/cuda/README.md](src/pdcs_gpu/cuda/README.md).
+
+## Dependencies
+
+Julia's package manager installs the dependencies listed in [Project.toml](Project.toml):
+JuMP, MathOptInterface, DataStructures, Match, Polynomials, SnoopPrecompile,
+Statistics, PythonCall, and Julia standard libraries. PythonCall is used by the
+GPU CVXPY bridge; the CPU solver does not import it. CUDA is an optional dependency.
+
+## Tests and contributions
+
+`Pkg.test()` runs the portable test module in [test/runtests.jl](test/runtests.jl).
+It checks CPU imports, cone projections, SOC/exponential/dual-exponential solves
+against analytic answers, bulk-cache structure and validation, and GPU utilities
+that do not require a device. It excludes linear-programming and rotated-SOC
+solve tests. GPU hardware regressions are run separately as described in the
+native GPU documentation. See [CONTRIBUTING.md](CONTRIBUTING.md) for adding tests.
+
+The `src/` and `ext/` directories contain the solver, `examples/` contains a small
+runnable example, and `test/` contains tests.
+
+The active GitHub Actions workflow runs the CPU suite with Julia 1.10 and the
+current stable Julia release on Linux, macOS, and Windows. Its manual dispatch
+also exposes an opt-in GPU job for a self-hosted runner labelled `nvidia-gpu`;
+hosted GitHub runners are not claimed to provide NVIDIA hardware.
+
+## Support and license
+
+Contact project manager Zikai Xiong, report bugs, and request features through
+https://github.com/ZikaiXiong/PDCS/issues. Include your Julia version, package
+versions, a small reproducing example, and GPU details when applicable.
+
+PDCS is distributed under the Apache License 2.0; see [LICENSE](LICENSE).
+See [AUTHORS](AUTHORS) for attribution.
+For community participation, see the [COIN-OR Code of Conduct](https://www.coin-or.org/code-of-conduct/).
 
 ### Convergence Criteria
 

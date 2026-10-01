@@ -1,0 +1,46 @@
+{
+  "project": "PDCS",
+  "release": "20261001-r2",
+  "prepared_at_utc": "2026-09-30T18:22:57.050892+00:00",
+  "upstream": "https://github.com/ZikaiXiong/PDCS",
+  "source_repository": "https://github.com/ZikaiXiong/PDCS",
+  "source_branch": "coin_or",
+  "source_commit": "966385736b25bea85f29be81bff8984f35c3b7af",
+  "package_uuid": "9123d4a1-5282-4e19-bc2a-6f2650421a93",
+  "package_uuid_status": "permanent",
+  "base_file_count": 74,
+  "base_files_preserved_byte_for_byte": false,
+  "manager": {
+    "name": "Zikai Xiong",
+    "email": "zikai.xiong@northwestern.edu"
+  },
+  "code_authors": [
+    "Zhenwei Lin",
+    "Zikai Xiong",
+    "Dongdong Ge",
+    "Yinyu Ye"
+  ],
+  "reference_paper": "https://arxiv.org/abs/2505.00311",
+  "project_license": "Apache-2.0",
+  "ownership_record": "OWNERSHIP.txt",
+  "third_party_notices": "THIRD_PARTY_NOTICES",
+  "layout_reference": "cuPDLP-C-coinor-20261001-r2; layout only, no code or validation claims reused",
+  "numerical_source_changes": false,
+  "cuclarabel_license_reference_commit": "ffa325c89fa90b7e86b745fa61b1dca64daf3a06",
+  "cuclarabel_original_import_commit": "not recorded in existing PDCS source comments",
+  "validation": "validation/SUMMARY.json",
+  "manifest": "SOURCE_MANIFEST.sha256",
+  "signed_legal_documents_included": false,
+  "submission_sent_by_this_task": false,
+  "unchanged_base_file_count": 70,
+  "metadata_overrides": [
+    "AUTHORS",
+    "CONTRIBUTING.md",
+    "Project.toml",
+    "README.md"
+  ],
+  "author_metadata_updated_at_utc": "2026-09-30T19:06:59.089957+00:00",
+  "author_metadata_source": "All paper authors, in paper order, at the submitting user's explicit request.",
+  "package_uuid_assigned_at_utc": "2026-09-30T21:03:35Z",
+  "package_uuid_source": "RFC 4122 version-4 UUID generated locally with uuidgen; absent from the locally installed General registry snapshot and the inspected workspace at assignment time."
+}

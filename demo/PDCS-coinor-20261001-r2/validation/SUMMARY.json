@@ -1,0 +1,148 @@
+{
+  "project": "PDCS",
+  "release": "20261001-r2",
+  "recorded_at_utc": "2026-09-30T18:23:44.555314+00:00",
+  "updated_at_utc": "2026-09-30T21:10:49Z",
+  "source_commit": "966385736b25bea85f29be81bff8984f35c3b7af",
+  "source_integrity": {
+    "checked_base_files": 74,
+    "match": false,
+    "differences": [
+      "AUTHORS",
+      "CONTRIBUTING.md",
+      "Project.toml",
+      "README.md"
+    ],
+    "matches_base_except_declared_metadata": true,
+    "unchanged_base_files": 70,
+    "runtime_files_checked": 65,
+    "runtime_source_match": true
+  },
+  "completed_checks_pass": true,
+  "package_identity": {
+    "name": "PDCS",
+    "uuid": "9123d4a1-5282-4e19-bc2a-6f2650421a93",
+    "uuid_status": "permanent",
+    "uuid_format": "RFC 4122 version 4",
+    "local_general_registry_collision": false,
+    "workspace_collision": false
+  },
+  "post_uuid_cpu_validation": {
+    "recorded_at_utc": "2026-09-30T21:10:49Z",
+    "julia": "1.12.5",
+    "offline": true,
+    "used_existing_local_depot": true,
+    "downloads": 0,
+    "command": "Pkg.instantiate(); include(\"examples/soc.jl\"); Pkg.test()",
+    "resolved_package_identity": "[9123d4a1] PDCS v0.1.0",
+    "soc_objective": 4.9999999996627995,
+    "passed": 89,
+    "total": 89,
+    "exit_code": 0
+  },
+  "cpu_fresh_depot": {
+    "julia": "1.11.4",
+    "passed": 89,
+    "total": 89,
+    "exit_code": 0,
+    "log": "cpu-fresh.log"
+  },
+  "release_wrapper_cpu": {
+    "command": "MODE=cpu bash build.sh",
+    "passed": 89,
+    "total": 89,
+    "exit_code": 0,
+    "log": "build-and-tests.log"
+  },
+  "archive_analytic_checks": [
+    {
+      "cone": "SOC",
+      "termination_status": "OPTIMAL",
+      "primal_status": "FEASIBLE_POINT",
+      "objective": 4.9999999996627995,
+      "expected": 5.0,
+      "absolute_error": 3.3720048975283134e-10
+    },
+    {
+      "cone": "EXP",
+      "termination_status": "OPTIMAL",
+      "primal_status": "FEASIBLE_POINT",
+      "objective": 2.718281828289473,
+      "expected": 2.718281828459045,
+      "absolute_error": 1.695719120675676e-10
+    },
+    {
+      "cone": "DUAL_EXP",
+      "termination_status": "OPTIMAL",
+      "primal_status": "FEASIBLE_POINT",
+      "objective": 0.36787944102817904,
+      "expected": 0.36787944117144233,
+      "absolute_error": 1.4326329011993266e-10
+    }
+  ],
+  "native_build": {
+    "exit_code": 0,
+    "nvcc": "12.6.77",
+    "architecture": "sm_80",
+    "artifact_count": 5,
+    "library_load": "passed",
+    "required_symbols": "passed",
+    "abi": 2,
+    "log": "native-build.log"
+  },
+  "prior_identical_source_gpu": {
+    "device": "NVIDIA A100-PCIE-40GB",
+    "julia": "1.10.4",
+    "cuda_jl": "5.11.3",
+    "passed": 47,
+    "total": 47,
+    "source_files_matched": 74,
+    "job_id": 7945917,
+    "log": "prior-same-source-gpu-a100.log"
+  },
+  "fresh_cuda6_gpu": {
+    "julia": "1.11.4",
+    "cuda_jl": "6.4.1",
+    "dependencies_installed": true,
+    "dependencies_precompiled": true,
+    "hardware_status": "pending",
+    "job_id": 7972329,
+    "hardware_passed": null
+  },
+  "ci": {
+    "run_id": 36734318016,
+    "tests_started": false,
+    "reason": "account billing lock"
+  },
+  "not_tested": [
+    "release build.sh GPU/all modes",
+    "fresh CUDA.jl 6.4.1 hardware run",
+    "Windows",
+    "macOS",
+    "optional Python/CVXPY bridge"
+  ],
+  "excluded_solver_cases": [
+    "linear programming",
+    "rotated second-order cone"
+  ],
+  "author_metadata_update": {
+    "at_utc": "2026-09-30T19:07:51.458921+00:00",
+    "authors": [
+      "Zhenwei Lin",
+      "Zikai Xiong",
+      "Dongdong Ge",
+      "Yinyu Ye"
+    ],
+    "modified_base_files": [
+      "AUTHORS",
+      "CONTRIBUTING.md",
+      "Project.toml",
+      "README.md"
+    ],
+    "runtime_source_unchanged": true,
+    "dependency_configuration_unchanged": true,
+    "solver_tests_rerun": true,
+    "solver_tests_rerun_at_utc": "2026-09-30T21:10:49Z",
+    "reason": "The CPU suite was rerun after the author metadata and permanent package UUID updates; existing GPU validation is retained because runtime source is unchanged."
+  }
+}

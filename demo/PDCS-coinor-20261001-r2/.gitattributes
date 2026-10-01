@@ -1,0 +1,6 @@
+# Exclude generated files from source archives.
+/Manifest.toml export-ignore
+/build export-ignore
+/build/** export-ignore
+*.so export-ignore
+*.ptx export-ignore

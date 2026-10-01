@@ -1,0 +1,20 @@
+PDCS validation environment records
+
+CPU fresh-clone and this-folder wrapper: Linux x86_64, Julia 1.11.4.
+Julia executable: /gpfs/software/julia/1.11.4/julia-1.11.4/bin/julia
+JULIA_LOAD_PATH=@:@stdlib; --startup-file=no; two Julia threads.
+The clone audit started with an empty fresh-depot; this folder's wrapper reused
+those downloaded dependencies. See CPU_MANIFEST.toml for resolved CPU packages.
+CPU_MANIFEST.toml is evidence only, not the package's installation manifest.
+
+Native build: Quest cuda/12.6.2-gcc-12.4.0, nvcc 12.6.77, sm_80.
+Completed GPU suite: NVIDIA A100-PCIE-40GB, driver 610.43.02,
+Julia 1.10.4, CUDA.jl 5.11.3, CUDA runtime artifact 13.2.
+The source of this GPU run matches the 74 base files in this release.
+
+Separate fresh GPU environment: Julia 1.11.4, CUDA.jl 6.4.1, JuMP 1.32.0,
+MathOptInterface 1.54.0. Dependencies installed and precompiled; hardware job
+7972329 remained pending at packaging. This is not a completed hardware result.
+
+The log paths and original host information are retained as test evidence.
+They are not hard-coded dependencies of the solver or the build.sh wrapper.

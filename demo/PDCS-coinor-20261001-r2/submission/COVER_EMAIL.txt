@@ -1,0 +1,32 @@
+DRAFT -- review before sending
+To: submissions@coin-or.org
+Subject: New COIN-OR project submission: PDCS
+
+Dear COIN-OR submissions team,
+
+Please find attached PDCS, a Julia primal-dual solver for large-scale conic
+optimization with CPU and optional CUDA GPU implementations.
+Project manager: Zikai Xiong (zikai.xiong@northwestern.edu).
+Project home: https://github.com/ZikaiXiong/PDCS
+Reference paper: https://arxiv.org/abs/2505.00311
+
+The package includes source code, README, AUTHORS, INSTALL, Apache-2.0 license
+and third-party notices, an analytic example, extensible tests, provenance,
+checksums and validation evidence. SOC, exponential-cone and dual-exponential-
+cone cases check OPTIMAL status and analytic objective values. Linear-programming
+and rotated-SOC solves are not included in the tests.
+
+The validation report distinguishes completed CPU/A100 checks from the separate
+CUDA.jl 6.4.1 GPU run and CI that could not start. Dependencies are documented in
+Project.toml and INSTALL and are obtained through Julia's package manager; CUDA
+toolkit/driver requirements are documented separately.
+
+Ownership and signed-statement status are described in OWNERSHIP.txt and
+submission/README.txt. Signed documents are handled separately with the Secretary.
+[Before sending, replace this line with the actual legal-document filing status.]
+
+Please advise on onboarding, the project classification and summary, and the
+preferred repository-hosting arrangement.
+
+Best regards,
+[Sender name and contact]

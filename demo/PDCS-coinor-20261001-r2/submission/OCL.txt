@@ -1,0 +1,6 @@
+Owner's Confirmation of Licensing
+
+I, ______________________________________, am an owner of the contribution
+________________________________, and I agree to license any portion I own
+under the terms of the _________________________________, an open source
+license certified by the Open Source Initiative.

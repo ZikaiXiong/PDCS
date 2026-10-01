@@ -1,0 +1,458 @@
+  Installing known registries into `/gpfs/home/rys3328/PDCS_submission_check/fresh-depot`
+       Added `General` registry to /gpfs/home/rys3328/PDCS_submission_check/fresh-depot/registries
+    Updating registry at `/gpfs/home/rys3328/PDCS_submission_check/fresh-depot/registries/General.toml`
+   Installed DiffRules ─────────────────── v1.16.0
+   Installed MicroMamba ────────────────── v0.1.15
+   Installed Match ─────────────────────── v2.4.1
+   Installed IrrationalConstants ───────── v0.2.6
+   Installed Scratch ───────────────────── v1.3.0
+   Installed JSON ──────────────────────── v1.10.0
+   Installed MutableArithmetics ────────── v1.8.1
+   Installed PythonCall ────────────────── v0.9.36
+   Installed DiffResults ───────────────── v1.1.0
+   Installed Bzip2_jll ─────────────────── v1.0.9+0
+   Installed CodecBzip2 ────────────────── v0.8.5
+   Installed TableTraits ───────────────── v1.0.1
+   Installed Tables ────────────────────── v1.14.0
+   Installed Parsers ───────────────────── v3.0.0
+   Installed SpecialFunctions ──────────── v2.9.0
+   Installed Preferences ───────────────── v1.6.0
+   Installed micromamba_jll ────────────── v2.3.1+0
+   Installed DataAPI ───────────────────── v1.16.0
+   Installed NaNMath ───────────────────── v1.1.4
+   Installed Pidfile ───────────────────── v1.3.0
+   Installed Setfield ──────────────────── v1.1.2
+   Installed PrecompileTools ───────────── v1.2.1
+   Installed JLLWrappers ───────────────── v1.8.0
+   Installed ConstructionBase ──────────── v1.6.0
+   Installed DataValueInterfaces ───────── v1.0.0
+   Installed IteratorInterfaceExtensions ─ v1.0.0
+   Installed StaticArraysCore ──────────── v1.4.4
+   Installed OrderedCollections ────────── v1.8.2
+   Installed TranscodingStreams ────────── v0.11.3
+   Installed JuMP ──────────────────────── v1.32.0
+   Installed SnoopPrecompile ───────────── v1.0.3
+   Installed Statistics ────────────────── v1.11.5
+   Installed ForwardDiff ───────────────── v1.4.6
+   Installed UnsafePointers ────────────── v1.0.0
+   Installed CommonSubexpressions ──────── v0.3.1
+   Installed LogExpFunctions ───────────── v1.0.2
+   Installed DataStructures ────────────── v0.19.6
+   Installed Polynomials ───────────────── v4.1.3
+   Installed MacroTools ────────────────── v0.5.16
+   Installed OpenSpecFun_jll ───────────── v0.5.6+0
+   Installed pixi_jll ──────────────────── v0.76.2+0
+   Installed CodecZlib ─────────────────── v0.7.9
+   Installed CondaPkg ──────────────────── v0.2.36
+   Installed StructUtils ───────────────── v2.9.2
+   Installed DocStringExtensions ───────── v0.9.5
+   Installed MathOptInterface ──────────── v1.54.0
+    Updating `/gpfs/home/rys3328/PDCS_submission_check/cloud_clone/Project.toml`
+  [864edb3b] + DataStructures v0.19.6
+  [4076af6c] + JuMP v1.32.0
+  [7eb4fadd] + Match v2.4.1
+  [b8f27783] + MathOptInterface v1.54.0
+  [f27b6e38] + Polynomials v4.1.3
+  [6099a3de] + PythonCall v0.9.36
+  [66db9d55] + SnoopPrecompile v1.0.3
+  [10745b16] + Statistics v1.11.5
+  [ade2ca70] ~ Dates ⇒ v1.11.0
+  [8f399da3] ~ Libdl ⇒ v1.11.0
+  [37e2e46d] ~ LinearAlgebra ⇒ v1.11.0
+  [56ddb016] ~ Logging ⇒ v1.11.0
+  [de0858da] ~ Printf ⇒ v1.11.0
+  [9a3f8284] ~ Random ⇒ v1.11.0
+  [2f01184e] ~ SparseArrays ⇒ v1.11.0
+    Updating `/gpfs/home/rys3328/PDCS_submission_check/cloud_clone/Manifest.toml`
+  [523fee87] + CodecBzip2 v0.8.5
+  [944b1d66] + CodecZlib v0.7.9
+  [bbf7d656] + CommonSubexpressions v0.3.1
+  [992eb4ea] + CondaPkg v0.2.36
+  [187b0558] + ConstructionBase v1.6.0
+  [9a962f9c] + DataAPI v1.16.0
+  [864edb3b] + DataStructures v0.19.6
+  [e2d170a0] + DataValueInterfaces v1.0.0
+  [163ba53b] + DiffResults v1.1.0
+  [b552c78f] + DiffRules v1.16.0
+  [ffbed154] + DocStringExtensions v0.9.5
+  [f6369f11] + ForwardDiff v1.4.6
+  [92d709cd] + IrrationalConstants v0.2.6
+  [82899510] + IteratorInterfaceExtensions v1.0.0
+  [692b3bcd] + JLLWrappers v1.8.0
+  [682c06a0] + JSON v1.10.0
+  [4076af6c] + JuMP v1.32.0
+  [2ab3a3ac] + LogExpFunctions v1.0.2
+  [1914dd2f] + MacroTools v0.5.16
+  [7eb4fadd] + Match v2.4.1
+  [b8f27783] + MathOptInterface v1.54.0
+  [0b3b1443] + MicroMamba v0.1.15
+  [d8a4904e] + MutableArithmetics v1.8.1
+  [77ba4419] + NaNMath v1.1.4
+⌅ [bac558e1] + OrderedCollections v1.8.2
+  [69de0a69] + Parsers v3.0.0
+  [fa939f87] + Pidfile v1.3.0
+  [f27b6e38] + Polynomials v4.1.3
+⌅ [aea7be01] + PrecompileTools v1.2.1
+  [21216c6a] + Preferences v1.6.0
+  [6099a3de] + PythonCall v0.9.36
+  [6c6a2e73] + Scratch v1.3.0
+  [efcf1570] + Setfield v1.1.2
+  [66db9d55] + SnoopPrecompile v1.0.3
+  [276daf66] + SpecialFunctions v2.9.0
+  [1e83bf80] + StaticArraysCore v1.4.4
+  [10745b16] + Statistics v1.11.5
+  [ec057cc2] + StructUtils v2.9.2
+  [3783bdb8] + TableTraits v1.0.1
+  [bd369af6] + Tables v1.14.0
+  [3bb67fe8] + TranscodingStreams v0.11.3
+  [e17b2a0c] + UnsafePointers v1.0.0
+  [6e34b625] + Bzip2_jll v1.0.9+0
+  [efe28fd5] + OpenSpecFun_jll v0.5.6+0
+  [f8abcde7] + micromamba_jll v2.3.1+0
+  [4d7b5844] + pixi_jll v0.76.2+0
+  [0dad84c5] + ArgTools v1.1.2
+  [56f22d72] + Artifacts v1.11.0
+  [2a0f44e3] + Base64 v1.11.0
+  [ade2ca70] + Dates v1.11.0
+  [f43a241f] + Downloads v1.6.0
+  [7b1f6079] + FileWatching v1.11.0
+  [9fa8497b] + Future v1.11.0
+  [b77e0a4c] + InteractiveUtils v1.11.0
+  [4af54fe1] + LazyArtifacts v1.11.0
+  [b27032c2] + LibCURL v0.6.4
+  [76f85450] + LibGit2 v1.11.0
+  [8f399da3] + Libdl v1.11.0
+  [37e2e46d] + LinearAlgebra v1.11.0
+  [56ddb016] + Logging v1.11.0
+  [d6f4376e] + Markdown v1.11.0
+  [ca575930] + NetworkOptions v1.2.0
+  [44cfe95a] + Pkg v1.11.0
+  [de0858da] + Printf v1.11.0
+  [9a3f8284] + Random v1.11.0
+  [ea8e919c] + SHA v0.7.0
+  [9e88b42a] + Serialization v1.11.0
+  [2f01184e] + SparseArrays v1.11.0
+  [fa267f1f] + TOML v1.0.3
+  [a4e569a6] + Tar v1.10.0
+  [8dfed614] + Test v1.11.0
+  [cf7118a7] + UUIDs v1.11.0
+  [4ec0a83e] + Unicode v1.11.0
+  [e66e0078] + CompilerSupportLibraries_jll v1.1.1+0
+  [deac9b47] + LibCURL_jll v8.6.0+0
+  [e37daf67] + LibGit2_jll v1.7.2+0
+  [29816b5a] + LibSSH2_jll v1.11.0+1
+  [c8ffd9c3] + MbedTLS_jll v2.28.6+0
+  [14a3606d] + MozillaCACerts_jll v2023.12.12
+  [4536629a] + OpenBLAS_jll v0.3.27+1
+  [05823500] + OpenLibm_jll v0.8.1+4
+  [bea87d4a] + SuiteSparse_jll v7.7.0+0
+  [83775a58] + Zlib_jll v1.2.13+1
+  [8e850b90] + libblastrampoline_jll v5.11.0+0
+  [8e850ede] + nghttp2_jll v1.59.0+0
+  [3f19e933] + p7zip_jll v17.4.0+2
+        Info Packages marked with ⌅ have new versions available but compatibility constraints restrict them from upgrading. To see why use `status --outdated -m`
+Precompiling project...
+    432.4 ms  ✓ Unicode
+    615.7 ms  ✓ OrderedCollections
+    338.6 ms  ✓ DataValueInterfaces
+    425.7 ms  ✓ OpenLibm_jll
+    622.8 ms  ✓ Serialization
+    421.3 ms  ✓ Zlib_jll
+    584.4 ms  ✓ DocStringExtensions
+    609.4 ms  ✓ Statistics
+    398.5 ms  ✓ UnsafePointers
+   1002.0 ms  ✓ IrrationalConstants
+    467.2 ms  ✓ ConstructionBase
+    354.9 ms  ✓ IteratorInterfaceExtensions
+    407.7 ms  ✓ DataAPI
+    490.9 ms  ✓ CompilerSupportLibraries_jll
+    462.7 ms  ✓ SuiteSparse_jll
+    377.9 ms  ✓ Future
+   2077.4 ms  ✓ MacroTools
+   1486.4 ms  ✓ InteractiveUtils
+    427.1 ms  ✓ StaticArraysCore
+    540.4 ms  ✓ TranscodingStreams
+    512.6 ms  ✓ Scratch
+    791.0 ms  ✓ StructUtils
+    689.1 ms  ✓ Preferences
+    456.8 ms  ✓ NaNMath
+   1596.0 ms  ✓ DataStructures
+    964.4 ms  ✓ LazyArtifacts
+    597.5 ms  ✓ LogExpFunctions
+    552.2 ms  ✓ ConstructionBase → ConstructionBaseLinearAlgebraExt
+    398.5 ms  ✓ TableTraits
+    744.0 ms  ✓ Match
+    470.8 ms  ✓ CommonSubexpressions
+   4564.0 ms  ✓ SparseArrays
+   3343.3 ms  ✓ Test
+    436.4 ms  ✓ DiffResults
+    492.4 ms  ✓ CodecZlib
+    425.7 ms  ✓ StructUtils → StructUtilsStaticArraysCoreExt
+    456.7 ms  ✓ SnoopPrecompile
+    478.0 ms  ✓ PrecompileTools
+    531.8 ms  ✓ JLLWrappers
+   1048.0 ms  ✓ Setfield
+   1075.8 ms  ✓ Tables
+    620.2 ms  ✓ Statistics → SparseArraysExt
+    461.0 ms  ✓ Pidfile
+   5053.6 ms  ✓ MutableArithmetics
+    564.9 ms  ✓ Bzip2_jll
+   1255.2 ms  ✓ micromamba_jll
+   1145.7 ms  ✓ pixi_jll
+    642.0 ms  ✓ OpenSpecFun_jll
+  28618.7 ms  ✓ Parsers
+    541.4 ms  ✓ StructUtils → StructUtilsTablesExt
+    592.7 ms  ✓ CodecBzip2
+  32049.8 ms  ✓ Polynomials
+  11676.6 ms  ✓ MicroMamba
+   3053.9 ms  ✓ SpecialFunctions
+   1271.4 ms  ✓ Polynomials → PolynomialsMutableArithmeticsExt
+    650.8 ms  ✓ DiffRules
+   8862.2 ms  ✓ ForwardDiff
+  13494.5 ms  ✓ JSON
+  17028.8 ms  ✓ CondaPkg
+  16627.6 ms  ✓ PythonCall
+  54243.8 ms  ✓ MathOptInterface
+  61241.8 ms  ✓ JuMP
+  58872.8 ms  ✓ PDCS
+  63 dependencies successfully precompiled in 247 seconds. 21 already precompiled.
+  3 dependencies had output during precompilation:
+┌ MicroMamba
+│  Downloading artifact: micromamba
+└  
+┌ CondaPkg
+│  Downloading artifact: pixi
+└  
+┌ PDCS
+│  [ Info: ============precompile PDCS_CPU============
+│  [ Info: ============precompile PDCS_CPU done============
+└  
+     Testing PDCS
+      Status `/tmp/jl_sHkBcd/Project.toml`
+  [864edb3b] DataStructures v0.19.6
+  [4076af6c] JuMP v1.32.0
+  [7eb4fadd] Match v2.4.1
+  [b8f27783] MathOptInterface v1.54.0
+  [00000000] PDCS v0.1.0 `/gpfs/home/rys3328/PDCS_submission_check/cloud_clone`
+  [f27b6e38] Polynomials v4.1.3
+  [6099a3de] PythonCall v0.9.36
+  [66db9d55] SnoopPrecompile v1.0.3
+  [10745b16] Statistics v1.11.5
+  [ade2ca70] Dates v1.11.0
+  [8f399da3] Libdl v1.11.0
+  [37e2e46d] LinearAlgebra v1.11.0
+  [56ddb016] Logging v1.11.0
+  [de0858da] Printf v1.11.0
+  [9a3f8284] Random v1.11.0
+  [2f01184e] SparseArrays v1.11.0
+  [8dfed614] Test v1.11.0
+      Status `/tmp/jl_sHkBcd/Manifest.toml`
+  [523fee87] CodecBzip2 v0.8.5
+  [944b1d66] CodecZlib v0.7.9
+  [bbf7d656] CommonSubexpressions v0.3.1
+  [992eb4ea] CondaPkg v0.2.36
+  [187b0558] ConstructionBase v1.6.0
+  [9a962f9c] DataAPI v1.16.0
+  [864edb3b] DataStructures v0.19.6
+  [e2d170a0] DataValueInterfaces v1.0.0
+  [163ba53b] DiffResults v1.1.0
+  [b552c78f] DiffRules v1.16.0
+  [ffbed154] DocStringExtensions v0.9.5
+  [f6369f11] ForwardDiff v1.4.6
+  [92d709cd] IrrationalConstants v0.2.6
+  [82899510] IteratorInterfaceExtensions v1.0.0
+  [692b3bcd] JLLWrappers v1.8.0
+  [682c06a0] JSON v1.10.0
+  [4076af6c] JuMP v1.32.0
+  [2ab3a3ac] LogExpFunctions v1.0.2
+  [1914dd2f] MacroTools v0.5.16
+  [7eb4fadd] Match v2.4.1
+  [b8f27783] MathOptInterface v1.54.0
+  [0b3b1443] MicroMamba v0.1.15
+  [d8a4904e] MutableArithmetics v1.8.1
+  [77ba4419] NaNMath v1.1.4
+⌅ [bac558e1] OrderedCollections v1.8.2
+  [00000000] PDCS v0.1.0 `/gpfs/home/rys3328/PDCS_submission_check/cloud_clone`
+  [69de0a69] Parsers v3.0.0
+  [fa939f87] Pidfile v1.3.0
+  [f27b6e38] Polynomials v4.1.3
+⌅ [aea7be01] PrecompileTools v1.2.1
+  [21216c6a] Preferences v1.6.0
+  [6099a3de] PythonCall v0.9.36
+  [6c6a2e73] Scratch v1.3.0
+  [efcf1570] Setfield v1.1.2
+  [66db9d55] SnoopPrecompile v1.0.3
+  [276daf66] SpecialFunctions v2.9.0
+  [1e83bf80] StaticArraysCore v1.4.4
+  [10745b16] Statistics v1.11.5
+  [ec057cc2] StructUtils v2.9.2
+  [3783bdb8] TableTraits v1.0.1
+  [bd369af6] Tables v1.14.0
+  [3bb67fe8] TranscodingStreams v0.11.3
+  [e17b2a0c] UnsafePointers v1.0.0
+  [6e34b625] Bzip2_jll v1.0.9+0
+  [efe28fd5] OpenSpecFun_jll v0.5.6+0
+  [f8abcde7] micromamba_jll v2.3.1+0
+  [4d7b5844] pixi_jll v0.76.2+0
+  [0dad84c5] ArgTools v1.1.2
+  [56f22d72] Artifacts v1.11.0
+  [2a0f44e3] Base64 v1.11.0
+  [ade2ca70] Dates v1.11.0
+  [f43a241f] Downloads v1.6.0
+  [7b1f6079] FileWatching v1.11.0
+  [9fa8497b] Future v1.11.0
+  [b77e0a4c] InteractiveUtils v1.11.0
+  [4af54fe1] LazyArtifacts v1.11.0
+  [b27032c2] LibCURL v0.6.4
+  [76f85450] LibGit2 v1.11.0
+  [8f399da3] Libdl v1.11.0
+  [37e2e46d] LinearAlgebra v1.11.0
+  [56ddb016] Logging v1.11.0
+  [d6f4376e] Markdown v1.11.0
+  [ca575930] NetworkOptions v1.2.0
+  [44cfe95a] Pkg v1.11.0
+  [de0858da] Printf v1.11.0
+  [9a3f8284] Random v1.11.0
+  [ea8e919c] SHA v0.7.0
+  [9e88b42a] Serialization v1.11.0
+  [2f01184e] SparseArrays v1.11.0
+  [fa267f1f] TOML v1.0.3
+  [a4e569a6] Tar v1.10.0
+  [8dfed614] Test v1.11.0
+  [cf7118a7] UUIDs v1.11.0
+  [4ec0a83e] Unicode v1.11.0
+  [e66e0078] CompilerSupportLibraries_jll v1.1.1+0
+  [deac9b47] LibCURL_jll v8.6.0+0
+  [e37daf67] LibGit2_jll v1.7.2+0
+  [29816b5a] LibSSH2_jll v1.11.0+1
+  [c8ffd9c3] MbedTLS_jll v2.28.6+0
+  [14a3606d] MozillaCACerts_jll v2023.12.12
+  [4536629a] OpenBLAS_jll v0.3.27+1
+  [05823500] OpenLibm_jll v0.8.1+4
+  [bea87d4a] SuiteSparse_jll v7.7.0+0
+  [83775a58] Zlib_jll v1.2.13+1
+  [8e850b90] libblastrampoline_jll v5.11.0+0
+  [8e850ede] nghttp2_jll v1.59.0+0
+  [3f19e933] p7zip_jll v17.4.0+2
+        Info Packages marked with ⌅ have new versions available but compatibility constraints restrict them from upgrading.
+Precompiling project for configuration --code-coverage=none --color=auto --check-bounds=yes --warn-overwrite=yes --depwarn=yes --inline=yes --startup-file=no --track-allocation=none...
+    428.2 ms  ✓ Unicode
+    576.8 ms  ✓ OrderedCollections
+    502.0 ms  ✓ NetworkOptions
+    348.5 ms  ✓ DataValueInterfaces
+    423.1 ms  ✓ OpenLibm_jll
+    588.8 ms  ✓ Serialization
+    410.1 ms  ✓ UUIDs
+    375.0 ms  ✓ Logging
+    433.8 ms  ✓ MbedTLS_jll
+    425.0 ms  ✓ Zlib_jll
+    547.5 ms  ✓ DocStringExtensions
+    554.3 ms  ✓ Statistics
+   1512.5 ms  ✓ ArgTools
+    403.1 ms  ✓ UnsafePointers
+   1147.3 ms  ✓ IrrationalConstants
+    512.3 ms  ✓ ConstructionBase
+    345.3 ms  ✓ IteratorInterfaceExtensions
+    405.2 ms  ✓ DataAPI
+    502.2 ms  ✓ Base64
+    355.1 ms  ✓ MozillaCACerts_jll
+    520.0 ms  ✓ CompilerSupportLibraries_jll
+    488.0 ms  ✓ SuiteSparse_jll
+    451.9 ms  ✓ Future
+    415.5 ms  ✓ nghttp2_jll
+    432.8 ms  ✓ p7zip_jll
+    742.6 ms  ✓ StaticArraysCore
+   2432.0 ms  ✓ MacroTools
+    515.3 ms  ✓ Printf
+    579.8 ms  ✓ TranscodingStreams
+    486.7 ms  ✓ NaNMath
+    427.8 ms  ✓ LibSSH2_jll
+    662.0 ms  ✓ Tar
+   1641.9 ms  ✓ DataStructures
+    407.1 ms  ✓ ConstructionBase → ConstructionBaseLinearAlgebraExt
+    625.0 ms  ✓ LogExpFunctions
+    385.7 ms  ✓ TableTraits
+   3555.3 ms  ✓ Markdown
+    444.7 ms  ✓ DiffResults
+   4266.3 ms  ✓ SparseArrays
+    781.7 ms  ✓ Match
+    504.9 ms  ✓ CommonSubexpressions
+    496.0 ms  ✓ CodecZlib
+    432.1 ms  ✓ LibGit2_jll
+    420.1 ms  ✓ LibCURL_jll
+   2160.3 ms  ✓ Dates
+   1317.2 ms  ✓ Setfield
+   1288.2 ms  ✓ Tables
+    631.4 ms  ✓ Statistics → SparseArraysExt
+   1474.1 ms  ✓ InteractiveUtils
+    713.7 ms  ✓ LibCURL
+    781.4 ms  ✓ StructUtils
+    511.2 ms  ✓ TOML
+   2344.2 ms  ✓ LibGit2
+    457.6 ms  ✓ Scratch
+   4284.1 ms  ✓ Test
+   4085.7 ms  ✓ Downloads
+    447.2 ms  ✓ StructUtils → StructUtilsTablesExt
+    440.8 ms  ✓ StructUtils → StructUtilsStaticArraysCoreExt
+    918.2 ms  ✓ Preferences
+    472.4 ms  ✓ Pidfile
+   5923.9 ms  ✓ MutableArithmetics
+  39904.6 ms  ✓ Polynomials
+    697.2 ms  ✓ SnoopPrecompile
+    542.8 ms  ✓ PrecompileTools
+    621.2 ms  ✓ JLLWrappers
+   1554.9 ms  ✓ Polynomials → PolynomialsMutableArithmeticsExt
+  34165.5 ms  ✓ Parsers
+    675.2 ms  ✓ Bzip2_jll
+    665.0 ms  ✓ OpenSpecFun_jll
+  14502.3 ms  ✓ JSON
+    599.3 ms  ✓ CodecBzip2
+   3105.8 ms  ✓ SpecialFunctions
+    650.4 ms  ✓ DiffRules
+  23918.8 ms  ✓ ForwardDiff
+ 146044.7 ms  ✓ Pkg
+   1323.2 ms  ✓ LazyArtifacts
+   1195.7 ms  ✓ micromamba_jll
+   9302.9 ms  ✓ pixi_jll
+  13400.2 ms  ✓ MicroMamba
+   3928.6 ms  ✓ CondaPkg
+  19503.6 ms  ✓ PythonCall
+ 120378.5 ms  ✓ MathOptInterface
+  29225.6 ms  ✓ JuMP
+  88250.7 ms  ✓ PDCS
+  84 dependencies successfully precompiled in 382 seconds
+  67 dependencies precompiled but different versions are currently loaded. Restart julia to access the new versions. Otherwise, loading dependents of these packages may trigger further precompilation to work with the unexpected versions.
+  1 dependency had output during precompilation:
+┌ PDCS
+│  [ Info: ============precompile PDCS_CPU============
+│  [ Info: ============precompile PDCS_CPU done============
+└  
+     Testing Running tests...
+initial nrm1G: 1.0 initial nrmInfG: 1.0
+initial nrm1c: 1.0
+initial nrmInfc: 1.0
+Start power method for estimating the largest eigenvalue of the matrix.
+sqrt(max eigenvalue of GtG):1.0
+initial nrm1G: 1.0 initial nrmInfG: 1.0
+initial nrm1c: 1.0
+initial nrmInfc: 1.0
+Start power method for estimating the largest eigenvalue of the matrix.
+sqrt(max eigenvalue of GtG):1.0
+initial nrm1G: 1.0 initial nrmInfG: 1.0
+initial nrm1c: 1.0
+initial nrmInfc: 1.0
+Start power method for estimating the largest eigenvalue of the matrix.
+sqrt(max eigenvalue of GtG):1.0
+Test Summary: | Pass  Total   Time
+PDCS          |   89     89  55.1s
+     Testing PDCS tests passed 
+JULIA=1.11.4
+DEPOT_PATH=["/gpfs/home/rys3328/PDCS_submission_check/fresh-depot"]
+LOAD_PATH=["@", "@stdlib"]
+PDCS_SOURCE=/gpfs/home/rys3328/PDCS_submission_check/cloud_clone/src/PDCS.jl
+initial nrm1G: 1.0 initial nrmInfG: 1.0
+initial nrm1c: 1.0
+initial nrmInfc: 1.0
+Start power method for estimating the largest eigenvalue of the matrix.
+sqrt(max eigenvalue of GtG):1.0
+SOC optimum: 4.9999999996627995 (expected 5.0)

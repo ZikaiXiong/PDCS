@@ -1,0 +1,51 @@
+name: CPU tests
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      run_gpu:
+        description: Run GPU tests on a configured self-hosted NVIDIA runner
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Julia ${{ matrix.julia-version }} / ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        julia-version: ['1.10', '1']
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: julia-actions/setup-julia@v2
+        with:
+          version: ${{ matrix.julia-version }}
+      - uses: julia-actions/cache@v2
+      - name: Verify release version metadata
+        shell: bash
+        run: |
+          project_version="$(julia --project=. -e 'using TOML; print(TOML.parsefile("Project.toml")["version"])')"
+          version_file="$(tr -d '\r\n' < VERSION)"
+          test "$project_version" = "$version_file"
+      - uses: julia-actions/julia-runtest@v1
+
+  gpu-test:
+    name: Julia 1.10 / self-hosted NVIDIA GPU
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.run_gpu }}
+    runs-on: [self-hosted, linux, x64, nvidia-gpu]
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - uses: julia-actions/setup-julia@v2
+        with:
+          version: '1.10'
+      - uses: julia-actions/cache@v2
+      - name: Build native CUDA projection and run GPU tests
+        run: MODE=gpu bash build.sh
