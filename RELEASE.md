@@ -1,6 +1,6 @@
 # PDCS release process
 
-The current project version is `0.1.0`. `Project.toml` is the authoritative
+The current project version is `0.1.1`. `Project.toml` is the authoritative
 Julia package version; the root `VERSION` file mirrors it for release tooling
 and reviewers. PDCS follows semantic versioning.
 
@@ -12,7 +12,7 @@ Before publishing a release:
    after setting `CUDA_HOME` and `GPU_ARCH`.
 4. Confirm that GitHub Actions passes on Linux, macOS, and Windows.
 5. Tag the reviewed commit with an annotated tag matching the project version,
-   for example `git tag -a v0.1.0 -m "PDCS 0.1.0"`, and publish the tag through
+   for example `git tag -a v0.1.1 -m "PDCS 0.1.1"`, and publish the tag through
    the canonical repository.
 6. Build any source archive from the tag, not from an uncommitted worktree.
 

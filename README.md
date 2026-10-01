@@ -1,5 +1,9 @@
 # PDCS
 
+<p align="center">
+  <img src="./pdcs_assets/PDCS_logo.png" alt="PDCS: Primal Dual Conic Programming Solver" width="70%">
+</p>
+
 [![CPU tests](https://github.com/ZikaiXiong/PDCS/actions/workflows/ci.yml/badge.svg)](https://github.com/ZikaiXiong/PDCS/actions/workflows/ci.yml)
 
 Authors: Zhenwei Lin, Zikai Xiong, Dongdong Ge, and Yinyu Ye.
@@ -13,7 +17,7 @@ Project home: https://github.com/ZikaiXiong/PDCS
 
 Julia package UUID: `9123d4a1-5282-4e19-bc2a-6f2650421a93`.
 
-Current project version: `0.1.0`. See [RELEASE.md](RELEASE.md) for the version
+Current project version: `0.1.1`. See [RELEASE.md](RELEASE.md) for the version
 and tag procedure.
 
 Project manager: [Zikai Xiong](https://github.com/ZikaiXiong).

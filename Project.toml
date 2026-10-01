@@ -1,7 +1,7 @@
 name = "PDCS"
 uuid = "9123d4a1-5282-4e19-bc2a-6f2650421a93"
 authors = ["Zhenwei Lin", "Zikai Xiong", "Dongdong Ge", "Yinyu Ye"]
-version = "0.1.0"
+version = "0.1.1"
 
 [deps]
 DataStructures = "864edb3b-99cc-5e75-8d2d-829cb0a9cfe8"
