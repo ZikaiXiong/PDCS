@@ -6,6 +6,11 @@ CPU installation (Julia 1.10 or newer)
 Install Julia from https://julialang.org/downloads/ and make `julia` available
 on PATH. In the root of this source checkout, run:
 
+    MODE=cpu bash build.sh
+
+This is the recommended end-to-end CPU build/test entry point. It runs the
+bundled example and the following Julia package commands:
+
     julia --project=. -e 'using Pkg; Pkg.instantiate()'
     julia --project=. examples/soc.jl
     julia --project=. -e 'using Pkg; Pkg.test()'
@@ -37,9 +42,18 @@ and the shared libraries/PTX built from src/pdcs_gpu/cuda. Follow that directory
 README.md to select an architecture, build artifacts, and run GPU regressions.
 Do not assume the default sm_90 architecture matches your device.
 
+The end-to-end GPU entry point builds the native projection artifacts and runs
+the hardware suite:
+
+    CUDA_HOME=/usr/local/cuda GPU_ARCH=sm_80 MODE=gpu bash build.sh
+
+Use `sm_80` for A100 or `sm_90` for H100, and adjust `CUDA_HOME` to the installed
+toolkit. `MODE=all` runs the CPU and GPU paths in one invocation.
+
 PythonCall is installed as a package dependency for the GPU CVXPY bridge.
 CPU use does not load PythonCall or require configuring Python. The optional
 CVXPY integration requires its own Python/CVXPY environment.
 
 See Project.toml for dependency UUIDs and version constraints, README.md for
-the package overview, and CONTRIBUTING.md for the test workflow.
+the package overview, CONTRIBUTING.md for the test workflow, and RELEASE.md for
+the version/tag procedure.

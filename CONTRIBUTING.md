@@ -42,7 +42,15 @@ device arithmetic, native SOC projection with workspace aliasing, lazy cuBLAS
 handle creation, and SOC/exponential/dual-exponential solves with analytic answers.
 
 The GitHub Actions workflow runs the CPU suite with Julia 1.10 and the current
-stable Julia release on Linux, macOS, and Windows.
+stable Julia release on Linux, macOS, and Windows. A manual workflow dispatch
+can also request the GPU suite on a self-hosted runner labelled `nvidia-gpu`.
+The runner must provide `CUDA_HOME`, `GPU_ARCH`, a compatible driver and an
+allocated NVIDIA device. Hosted CPU CI does not claim GPU coverage.
+
+## Releases
+
+Keep the version in `Project.toml` synchronized with the root `VERSION` file.
+Follow [RELEASE.md](RELEASE.md) before creating a release tag.
 
 ## COIN-OR submission preparation
 

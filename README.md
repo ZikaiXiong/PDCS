@@ -1,5 +1,7 @@
 # PDCS
 
+[![CPU tests](https://github.com/ZikaiXiong/PDCS/actions/workflows/ci.yml/badge.svg)](https://github.com/ZikaiXiong/PDCS/actions/workflows/ci.yml)
+
 Authors: Zhenwei Lin, Zikai Xiong, Dongdong Ge, and Yinyu Ye.
 
 PDCS is a Julia solver for large-scale conic optimization, with CPU and optional
@@ -11,12 +13,23 @@ Project home: https://github.com/ZikaiXiong/PDCS
 
 Julia package UUID: `9123d4a1-5282-4e19-bc2a-6f2650421a93`.
 
+Current project version: `0.1.0`. See [RELEASE.md](RELEASE.md) for the version
+and tag procedure.
+
 Project manager: [Zikai Xiong](https://github.com/ZikaiXiong).
 Email: [zikai.xiong@northwestern.edu](mailto:zikai.xiong@northwestern.edu).
 
 ## Install and run
 
-Requires Julia 1.10 or newer. From the root of this checkout:
+Requires Julia 1.10 or newer. From the root of this checkout, the recommended
+end-to-end CPU command is:
+
+```sh
+MODE=cpu bash build.sh
+```
+
+It instantiates the environment, runs the small SOC example, and executes the
+portable test suite. The equivalent individual commands are:
 
 ```sh
 julia --project=. -e 'using Pkg; Pkg.instantiate()'
@@ -49,6 +62,15 @@ using PDCS: PDCS_GPU
 model = Model(PDCS_GPU.Optimizer)
 ```
 
+The complete GPU build and hardware test can be run with:
+
+```sh
+CUDA_HOME=/usr/local/cuda GPU_ARCH=sm_80 MODE=gpu bash build.sh
+```
+
+Select `GPU_ARCH` for the allocated device; `sm_80` is appropriate for A100 and
+`sm_90` for H100. See [INSTALL](INSTALL) for the full prerequisites.
+
 Native GPU projection build requirements and diagnostics are documented in
 [src/pdcs_gpu/cuda/README.md](src/pdcs_gpu/cuda/README.md).
 
@@ -70,6 +92,11 @@ native GPU documentation. See [CONTRIBUTING.md](CONTRIBUTING.md) for adding test
 
 The `src/` and `ext/` directories contain the solver, `examples/` contains a small
 runnable example, and `test/` contains tests.
+
+The active GitHub Actions workflow runs the CPU suite with Julia 1.10 and the
+current stable Julia release on Linux, macOS, and Windows. Its manual dispatch
+also exposes an opt-in GPU job for a self-hosted runner labelled `nvidia-gpu`;
+hosted GitHub runners are not claimed to provide NVIDIA hardware.
 
 ## Support and license
 
