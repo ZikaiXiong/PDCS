@@ -36,6 +36,30 @@ jobs:
           test "$project_version" = "$version_file"
       - uses: julia-actions/julia-runtest@v1
 
+  cvxpy-options:
+    name: CVXPY options / Python 3.12 / Julia 1.10
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: julia-actions/setup-julia@v2
+        with:
+          version: '1.10'
+      - uses: julia-actions/cache@v2
+      - name: Install CVXPY
+        run: python -m pip install cvxpy==1.9.3
+      - name: Check parameter validation and CVXPY forwarding without a GPU
+        run: python test/test_cvxpy_options.py
+      - name: Check Python-to-Julia keyword conversion
+        env:
+          JULIA_CONDAPKG_BACKEND: 'Null'
+        run: |
+          export JULIA_PYTHONCALL_EXE="$(which python)"
+          julia --project=. -e 'using Pkg; Pkg.instantiate()'
+          julia --project=. test/test_cvxpy_juliacall.jl
+
   gpu-test:
     name: Julia 1.10 / self-hosted NVIDIA GPU
     if: ${{ github.event_name == 'workflow_dispatch' && inputs.run_gpu }}

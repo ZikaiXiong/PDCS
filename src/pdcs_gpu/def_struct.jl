@@ -1424,13 +1424,13 @@ mutable struct PDCS_GPU_Solver
         mGzero::Integer, # m of Q for zero cone
         mGnonnegative::Integer, # m of Q for positive cone
         socG::Vector{<:Integer},
-        rsocG::Vector{<:Integer},
+        rsocG::Vector{<:Integer} = Int[],
         expG::Integer,
         dual_expG::Integer,
         bl::Union{Vector{rpdhg_float}, CuArray},
         bu::Union{Vector{rpdhg_float}, CuArray},
         soc_x::Vector{<:Integer},
-        rsoc_x::Vector{<:Integer},
+        rsoc_x::Vector{<:Integer} = Int[],
         exp_x::Integer = 0,
         dual_exp_x::Integer = 0,
         Dl::Union{Vector{rpdhg_float}, CuArray} = ones(m),

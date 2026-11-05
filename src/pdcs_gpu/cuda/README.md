@@ -29,6 +29,25 @@ libfew_block_proj.so
 produces separate diagnostic kernels for the solver's projection profiling API;
 these are optional and are not used by the standard hardware tests.
 
+## CVXPY hardware regression
+
+After installing this checkout and CUDA in the Julia environment used by
+JuliaCall, configuring the production artifacts, and installing CVXPY (tested
+with 1.9.3), JuliaCall, and CuPy for the chosen CUDA toolkit, run:
+
+```bash
+python test/test_cvxpy_gpu.py --report gpu-results.json
+```
+
+This requires an allocated GPU and checks 24 SOC, exponential-cone, and mixed
+solves against analytic answers. It covers scaling controls, fixed steps with
+restart disabled, and repeated cold/warm solves. The optional argument
+`--julia-source src/pdcs_gpu/PDCS_GPU.jl` loads a checkout directly from an
+existing dependency environment; that mode does not verify package installation.
+
+The CPU CI job checks parameter validation and Julia keyword conversions;
+these hardware checks are separate and do not run on hosted CPU runners.
+
 ## Install the GPU test environment
 
 From the repository root, create an isolated Julia environment:

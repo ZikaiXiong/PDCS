@@ -419,13 +419,13 @@ function rpdhg_gpu_solve_input_gpu_data(;
     mGzero::Integer, # m of Q for zero cone
     mGnonnegative::Integer, # m of Q for positive cone
     socG::Vector{<:Integer},
-    rsocG::Vector{<:Integer},
+    rsocG::Vector{<:Integer} = Int[],
     expG::Integer,
     dual_expG::Integer,
     bl::CuArray{rpdhg_float},
     bu::CuArray{rpdhg_float},
     soc_x::Vector{<:Integer},
-    rsoc_x::Vector{<:Integer},
+    rsoc_x::Vector{<:Integer} = Int[],
     exp_x::Integer = 0,
     dual_exp_x::Integer = 0,
     Dl::CuArray{rpdhg_float} = CuArray(ones(m)),
@@ -477,6 +477,14 @@ dGType<:Union{
     CUDA.CUSPARSE.CuSparseMatrixCSR{Float64,Int64},
     Adjoint{Float64, CUDA.CUSPARSE.CuSparseMatrixCSR{Float64, Int64}}
 }}
+    # The maintained GPU loop uses diagonal workspaces even without scaling.
+    # Match MOI's use_scaling=false path: :none leaves all scaling factors at
+    # one and bypasses data rescaling, while retaining complete solver state.
+    requested_preconditioner = use_preconditioner
+    if !use_preconditioner
+        rescaling_method = :none
+        use_preconditioner = true
+    end
     adaptive_projection_tolerance = resolve_adaptive_projection_tolerance(
         adaptive_projection_tolerance, socG, rsocG, soc_x, rsoc_x;
         expG=expG, dual_expG=dual_expG, exp_x=exp_x,
@@ -527,7 +535,7 @@ dGType<:Union{
         @info ("------------- Parameter Info Summary --------------")
         @info ("---------------------------------------------------")
         @info ("time limit: $time_limit")
-        @info ("use_preconditioner: $use_preconditioner")
+        @info ("use_preconditioner: $requested_preconditioner")
         @info ("rescaling_method: $rescaling_method")
         @info ("scalar_cone_rescaling: $scalar_cone_rescaling")
         @info ("use_adaptive_diagonal_scalar_rescaling: $use_adaptive_diagonal_scalar_rescaling")
@@ -585,7 +593,7 @@ dGType<:Union{
     end
     if use_preconditioner
         if verbose > 0
-            @info "Using preconditioner"
+            @info (rescaling_method == :none ? "Using identity scaling" : "Using preconditioner")
         end
     else
         if verbose > 0
@@ -1276,13 +1284,13 @@ end # end rpdhg_cpu_solve
     - `mGzero`: the number of zero constraints
     - `mGnonnegative`: the number of nonnegative constraints
     - `socG`: a `Vector` of sizes of SOCs
-    - `rsocG`: a `Vector` of sizes of rotated SOCs
+    - `rsocG`: compatibility field, defaults to `Int[]`
     - `expG`: the number of exponential cones
     - `dual_expG`: the number of dual exponential cones
     - `bl`: the `Vector` of lower bounds for the box cone, length `nb`
     - `bu`: the `Vector` of upper bounds for the box cone, length `nb`
     - `soc_x`: the `Vector` of indices of variables in `x` that belong to SOCs
-    - `rsoc_x`: the `Vector` of indices of variables in `x` that belong to rotated SOCs
+    - `rsoc_x`: compatibility field, defaults to `Int[]`
     - `exp_x`: the number of exponential cones
     - `dual_exp_x`: the number of dual exponential cones
     - `Dl`: the `Vector` of length `m` to scale the constraints
@@ -1359,13 +1367,13 @@ function rpdhg_gpu_solve(;
     mGzero::Integer, # m of Q for zero cone
     mGnonnegative::Integer, # m of Q for positive cone
     socG::Vector{<:Integer},
-    rsocG::Vector{<:Integer},
+    rsocG::Vector{<:Integer} = Int[],
     expG::Integer,
     dual_expG::Integer,
     bl::Vector{rpdhg_float},
     bu::Vector{rpdhg_float},
     soc_x::Vector{<:Integer},
-    rsoc_x::Vector{<:Integer},
+    rsoc_x::Vector{<:Integer} = Int[],
     exp_x::Integer = 0,
     dual_exp_x::Integer = 0,
     Dl::Vector{rpdhg_float} = ones(m),
@@ -1413,6 +1421,14 @@ function rpdhg_gpu_solve(;
     sparse_index_type = :auto,
 )where {hType<:Union{Vector{rpdhg_float}, SparseVector{rpdhg_float}}
 }
+    # Keep unscaled solves on the same maintained loop as MOI's
+    # use_scaling=false path. Identity factors preserve the input problem and
+    # let restart, projection, and convergence checks share the GPU machinery.
+    requested_preconditioner = use_preconditioner
+    if !use_preconditioner
+        rescaling_method = :none
+        use_preconditioner = true
+    end
     adaptive_projection_tolerance = resolve_adaptive_projection_tolerance(
         adaptive_projection_tolerance, socG, rsocG, soc_x, rsoc_x;
         expG=expG, dual_expG=dual_expG, exp_x=exp_x,
@@ -1462,7 +1478,7 @@ function rpdhg_gpu_solve(;
         @info ("------------- Parameter Info Summary --------------")
         @info ("---------------------------------------------------")
         @info ("time limit: $time_limit")
-        @info ("use_preconditioner: $use_preconditioner")
+        @info ("use_preconditioner: $requested_preconditioner")
         @info ("rescaling_method: $rescaling_method")
         @info ("scalar_cone_rescaling: $scalar_cone_rescaling")
         @info ("use_adaptive_diagonal_scalar_rescaling: $use_adaptive_diagonal_scalar_rescaling")
@@ -1523,7 +1539,7 @@ function rpdhg_gpu_solve(;
     end
     if use_preconditioner
         if verbose > 0
-            @info "Using preconditioner"
+            @info (rescaling_method == :none ? "Using identity scaling" : "Using preconditioner")
         end
     else
         if verbose > 0
@@ -2204,6 +2220,7 @@ function solve_with_solver(solver::PDCS_GPU_Solver)
             exp_x = solver.exp_x,
             dual_exp_x = solver.dual_exp_x,
             Dl = solver.Dl,
+            Dr = solver.Dr,
             rescaling_method = solver.rescaling_method,
             scalar_cone_rescaling = solver.scalar_cone_rescaling,
             use_adaptive_diagonal_scalar_rescaling =
@@ -2229,6 +2246,10 @@ function solve_with_solver(solver::PDCS_GPU_Solver)
             max_inner_iter = solver.max_inner_iter,
             abs_tol = solver.abs_tol,
             rel_tol = solver.rel_tol,
+            eps_primal_infeasible_low_acc = solver.eps_primal_infeasible_low_acc,
+            eps_dual_infeasible_low_acc = solver.eps_dual_infeasible_low_acc,
+            eps_primal_infeasible_high_acc = solver.eps_primal_infeasible_high_acc,
+            eps_dual_infeasible_high_acc = solver.eps_dual_infeasible_high_acc,
             logfile_name = solver.logfile_name,
             use_kkt_restart = solver.use_kkt_restart,
             kkt_restart_freq = solver.kkt_restart_freq,
@@ -2261,6 +2282,7 @@ function solve_with_solver(solver::PDCS_GPU_Solver)
             exp_x = solver.exp_x,
             dual_exp_x = solver.dual_exp_x,
             Dl = solver.Dl,
+            Dr = solver.Dr,
             rescaling_method = solver.rescaling_method,
             scalar_cone_rescaling = solver.scalar_cone_rescaling,
             use_adaptive_diagonal_scalar_rescaling =
@@ -2286,6 +2308,10 @@ function solve_with_solver(solver::PDCS_GPU_Solver)
             max_inner_iter = solver.max_inner_iter,
             abs_tol = solver.abs_tol,
             rel_tol = solver.rel_tol,
+            eps_primal_infeasible_low_acc = solver.eps_primal_infeasible_low_acc,
+            eps_dual_infeasible_low_acc = solver.eps_dual_infeasible_low_acc,
+            eps_primal_infeasible_high_acc = solver.eps_primal_infeasible_high_acc,
+            eps_dual_infeasible_high_acc = solver.eps_dual_infeasible_high_acc,
             logfile_name = solver.logfile_name,
             use_kkt_restart = solver.use_kkt_restart,
             kkt_restart_freq = solver.kkt_restart_freq,

@@ -78,6 +78,120 @@ Select `GPU_ARCH` for the allocated device; `sm_80` is appropriate for A100 and
 Native GPU projection build requirements and diagnostics are documented in
 [src/pdcs_gpu/cuda/README.md](src/pdcs_gpu/cuda/README.md).
 
+## CVXPY parameter interface
+
+The maintained adapter is
+[`pdcs_cvxpy.py`](src/pdcs_gpu/cvxpy_wrapper/pdcs_cvxpy.py). It extends CVXPY's
+PDCS adapter and requires a CVXPY version containing that adapter (validated
+with 1.9.3), CuPy, JuliaCall, and a Julia environment containing CUDA and this
+PDCS checkout. From the repository root, expose the adapter to Python:
+
+```bash
+export PYTHONPATH="$PWD/src/pdcs_gpu/cvxpy_wrapper${PYTHONPATH:+:$PYTHONPATH}"
+```
+
+Register it once, before the first solve in each Python process:
+
+```python
+import cvxpy as cp
+from pdcs_cvxpy import register
+
+register()
+t = cp.Variable()
+prob = cp.Problem(cp.Minimize(t), [cp.SOC(t, cp.Constant([3.0, 4.0]))])
+prob.solve(
+    solver=cp.PDCS,
+    abs_tol=1e-6,
+    rel_tol=1e-6,
+    time_limit_secs=60.0,
+    use_adaptive_step=False,
+    use_scaling=True,
+    rescaling_method="ruiz_pock_chambolle",
+    max_inner_iter=100000,
+    verbose=True,
+)
+```
+
+`register()` selects this checkout's adapter for `cp.PDCS` in the current
+process. The `examples/cvxpy_parameters.py` example registers it automatically.
+If JuliaCall's active project does not contain this checkout, pass
+`julia_env="/absolute/path/to/your/julia/project"`; that project must already
+have PDCS and CUDA installed.
+
+JuMP sets options with `set_optimizer_attribute(model, "use_adaptive_step", false)`;
+CVXPY passes `prob.solve(solver=cp.PDCS, use_adaptive_step=False)`; the Julia
+direct API accepts `use_adaptive_step=false` as a keyword argument to
+`rpdhg_gpu_solve` or `PDCS_GPU_Solver`, alongside the problem data.
+
+| CVXPY keyword | Julia constructor keyword | Meaning |
+| --- | --- | --- |
+| `time_limit_secs` or `time_limit` | `time_limit` | Time limit in seconds; `float("inf")` removes the limit |
+| `logfile` or `logfile_name` | `logfile_name` | Plain path string / `PathLike`, or `None` to disable file logging |
+| `use_scaling` or `use_preconditioner` | `use_preconditioner` | Enable diagonal preconditioning |
+| `rescaling_method` | `rescaling_method` | Python string converted to a Julia `Symbol` |
+| `pdcs_method` | `method` | Currently `"average"`; `method` itself is reserved by CVXPY |
+| `verbose` / `solver_verbose` | `verbose` | CVXPY controls solver verbosity; forwarded as `0` or `1` |
+| `warm_start` | `warm_start`, `primal_sol`, `dual_sol` | Reuse the previous optimal solution when the cone dimensions match |
+| `julia_env` | Project activation | Select the Julia project before loading PDCS |
+
+The following algorithm options are forwarded under their Julia names:
+
+| Group | Keywords |
+| --- | --- |
+| Accuracy | `abs_tol`, `rel_tol`, `eps_primal_infeasible_low_acc`, `eps_dual_infeasible_low_acc`, `eps_primal_infeasible_high_acc`, `eps_dual_infeasible_high_acc` |
+| Iterations and reporting | `max_outer_iter`, `max_inner_iter`, `print_freq`, `check_terminate_freq` |
+| Scaling and step size | `scalar_cone_rescaling`, `use_adaptive_diagonal_scalar_rescaling`, `use_adaptive_step`, `use_adaptive_step_size_weight`, `adaptive_projection_tolerance` |
+| Iterate updates | `use_aggressive`, `use_reflection`, `use_weighted_average`, `use_halpern`, `use_inline_halpern`, `use_resolving` |
+| Restart | `use_adaptive_restart`, `use_restart`, `use_current_restart_candidate`, `use_mean_restart_candidate`, `use_kkt_restart`, `kkt_restart_freq`, `use_duality_gap_restart`, `duality_gap_restart_freq` |
+
+Unspecified algorithm options use the Julia constructor's defaults, including
+defaults derived from other options. The CVXPY time limit remains 1000 seconds
+unless overridden. Boolean options require Python booleans;
+`adaptive_projection_tolerance` and `use_inline_halpern` also accept `None`
+for automatic selection. Iteration limits and frequencies must be positive
+integers; tolerances must be finite and nonnegative.
+
+Supported `rescaling_method` strings are `"none"`, `"ruiz"`,
+`"pock_chambolle"`, `"ruiz_pock_chambolle"`, and
+`"ruiz_pock_chambolle_scalar_cone"`. Use `use_halpern` or
+`use_inline_halpern` for the supported Halpern controls; the legacy
+`pdcs_method="halpern"` path is rejected. The compatibility option
+`use_accelerated` issues a deprecation warning and remains ignored by Julia.
+
+Unknown options, invalid types, and conflicting alias values raise an error.
+CVXPY supplies matrix data and cone dimensions, so direct-API data keywords
+cannot be overridden here. The CuPy pointer bridge uses Int32 sparse indices;
+use the Julia direct API for matrices exceeding that range.
+
+Parameter-forwarding regression tests can run without a GPU. The Python tests
+use real CVXPY canonicalization with a simulated GPU backend; the Julia tests
+exercise both branches of the actual solver dispatcher:
+
+```bash
+python test/test_cvxpy_options.py
+julia --startup-file=no test/test_solver_keyword_forwarding.jl
+```
+
+An additional bridge test checks real Python-to-Julia type conversion without
+a GPU. Run `test/test_cvxpy_juliacall.jl` in a Julia project containing
+PythonCall, with `JULIA_PYTHONCALL_EXE` pointing to the Python environment
+containing CVXPY.
+
+For actual GPU validation, run the deterministic SOC, exponential-cone, and
+mixed-cone regression after configuring CuPy, JuliaCall, and the CUDA artifacts:
+
+```bash
+python test/test_cvxpy_gpu.py --report gpu-results.json
+```
+
+It checks analytic objective values, feasibility, and finite dual solutions in
+24 solves covering default settings, adaptive steps, disabled scaling, fixed
+steps without restart, Ruiz scaling, warm starts, and repeated cold starts. If the Julia
+environment contains solver dependencies but not an installed PDCS package,
+add `--julia-source src/pdcs_gpu/PDCS_GPU.jl` to load this checkout directly.
+This mode tests the actual GPU solver and CVXPY bridge but does not test Julia
+package installation/discovery.
+
 ## Dependencies
 
 Julia's package manager installs the dependencies listed in [Project.toml](Project.toml):

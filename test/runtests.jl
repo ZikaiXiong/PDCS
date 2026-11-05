@@ -11,6 +11,7 @@ using Test
     # These GPU utilities are pure Julia and need no CUDA device.
     include("test_projection_strategy.jl")
     include("test_plain_multi_logger.jl")
+    include("test_solver_keyword_forwarding.jl")
 end
 
 end
